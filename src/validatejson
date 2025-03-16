@@ -1,0 +1,17 @@
+import json
+
+file_path = "src/cosmic-ray-config.json"
+
+try:
+    with open(file_path, 'r') as file:
+        config = json.load(file)
+    print("Configuration file is valid!")
+except json.JSONDecodeError as e:
+    print(f"JSON Error: {e}")
+import chardet
+
+file_path = "src/cosmic-ray-config.json"
+with open(file_path, 'rb') as file:
+    encoding = chardet.detect(file.read())['encoding']
+print(f"File encoding: {encoding}")
+

@@ -1,0 +1,8 @@
+[cosmic-ray]
+module-path = "./source_files/arrays"
+timeout = 10.0
+excluded-modules = []
+test-command = "python -m unittest discover ./tests/arrays"
+
+[cosmic-ray.distributor]
+name = "local"
