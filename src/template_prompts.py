@@ -121,31 +121,30 @@ def get_prompt(code_chunk, language="python", prompt_type="functionality", shot_
                 - repository.save = MagicMock(side_effect=TypeError("Expected an instance of Order"))
                 - with self.assertRaises(TypeError):
                         repository.save(None)  
-            12. Generate individual test cases for ior each test data point separately:               
-            12. Add clear and descriptive comments for each test case to explain what is being tested and why.
-            13.Include a setUp() method to reset any class-level counters or states before each test. 
-            14.Ensure the generated code:
+            12. Generate individual test cases for ior each test data point separately               
+            13. Add clear and descriptive comments for each test case to explain what is being tested and why.
+            14.Include a setUp() method to reset any class-level counters or states before each test. 
+            15.Ensure the generated code:
                 - Is properly formatted.
                 - Adheres to {language} coding standards.
                 - Is compatible with common unit test frameworks (e.g., unittest for Python).
-            15. Add a 'main' method at the end of the test script to allow standalone execution if not present. 
+            16. Add a 'main' method at the end of the test script to allow standalone execution if not present. 
                 For example, in Python:
                 if __name__ == "__main__":
                     unittest.main()
-            16.Output a complete, ready-to-execute unit test script that compiles successfully 
+            17.Output a complete, ready-to-execute unit test script that compiles successfully 
             and ensures the tests cover edge cases comprehensively.
-            17.Remove all  lines starting with triple backticks ```
-            18.Do not include any markdown syntax, such as ``` or language-specific markers (like `python`)
+            18.Remove all  lines starting with triple backticks ```
+            19.Do not include any markdown syntax, such as ``` or language-specific markers (like `python`)
             Handle Special Characters: For special characters, the prompt instructs the test generation process to ensure that any double quotes or backslashes are escaped properly, and string literals are handled correctly.
-            19. filter out class variables and static method references from the input variables
+            20. filter out class variables and static method references from the input variables
             Mock Dependencies: The test generation script will replace real dependencies (like settings, re, etc.) with mocked or hardcoded values. For example:
             Mock settings.PASSWORD_MIN_LENGTH = 8
             Mock regex patterns for special characters, numeric values, etc.
-            20 Automate for Multiple Files: The prompt can be fed into a script that processes multiple files. The script will:
+            21 Automate for Multiple Files: The prompt can be fed into a script that processes multiple files. The script will:
             Extract methods/functions from each file.Use the template to generate unit test cases for each method.
-            21.Ensure that special characters and external dependencies are handled properly across all files.
-            22.Ensure code compiles and correct any import errors
+            22.Ensure that special characters and external dependencies are handled properly across all files.
+            23.Ensure code compiles and correct any import errors
             Example:
     {examples}
     """
-

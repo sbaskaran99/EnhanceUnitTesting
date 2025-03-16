@@ -44,7 +44,7 @@ def discover_and_run_tests(test_folder, output_json="test_results.json", output_
         return
     print("TestFolder",test_folder)
     loader = unittest.defaultTestLoader
-    topleveldir="D:\\Sai\\UnitTesting-LangChain\\tests"
+    topleveldir="D:\\Sai\\EnhanceUnitTesting\\tests"
     suite = loader.discover(test_folder, pattern="test_*.py",top_level_dir=topleveldir)
     #suite = loader.discover(test_folder, pattern="test_*.py",top_level_dir=test_folder)
     if suite.countTestCases() == 0:
@@ -84,8 +84,8 @@ def discover_and_run_tests(test_folder, output_json="test_results.json", output_
     # Generate and store the coverage report in an HTML file
     cov.html_report(directory="coverage_html_report")    
     # Optionally, generate a simple text report for the console
-   #cov.report(omit="*/tests/*")
-   # print(f"Coverage report saved to {coverage_file}")
+    cov.report(omit="*/tests/*")
+    print(f"Coverage report saved to {coverage_file}")
 
 def _collect_test_cases(test_or_suite, all_test_cases):
     """ Recursively collects test cases from a suite or individual test case. """
@@ -216,7 +216,7 @@ if __name__ == "__main__":
     # Run the tests and save results in both JSON and HTML formats
     discover_and_run_tests(test_folder, output_json, output_html)
     # Generate the coverage report
-    #generate_coverage_report_file(COVERAGE_REPORT_PATH)
+    generate_coverage_report_file(COVERAGE_REPORT_PATH)
 
 
 

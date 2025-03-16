@@ -104,6 +104,8 @@ def get_prompt(code_chunk, language="python", prompt_type="functionality", shot_
                 - Testing boundary values (e.g., maximum and minimum allowable inputs).
                 - Unexpected scenarios (e.g., empty inputs, null values).
                 - **Ensure that ID values are positive integers and do not allow zero or negative IDs.**
+                -Ensure that division correctly handles negative and positive numbers.
+                -Allow division where the numerator is zero (0 / x should return 0).
                 - **Test cases must validate that invalid IDs like zero or negative IDs raise the expected 'ValueError'.**
                 - **Test cases must validate that invalid IDs raise the expected 'ValueError'.**
             11. Include meaningful error-handling tests. Verify that appropriate exceptions are raised 
@@ -119,7 +121,7 @@ def get_prompt(code_chunk, language="python", prompt_type="functionality", shot_
                 - repository.save = MagicMock(side_effect=TypeError("Expected an instance of Order"))
                 - with self.assertRaises(TypeError):
                         repository.save(None)  
-                          
+            12. Generate individual test cases for ior each test data point separately:               
             12. Add clear and descriptive comments for each test case to explain what is being tested and why.
             13.Include a setUp() method to reset any class-level counters or states before each test. 
             14.Ensure the generated code:

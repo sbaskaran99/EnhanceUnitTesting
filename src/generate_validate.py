@@ -17,9 +17,9 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 # Define paths
-SOURCE_FOLDER_PATH = r"D:\Sai\UnitTesting-LangChain\source_files"
-TEST_FOLDER_PATH = r"D:\Sai\UnitTesting-LangChain\tests"
-RESULTS_FILE_PATH = r"D:/Sai/UnitTesting-LangChain/results.html"
+SOURCE_FOLDER_PATH = r"D:\Sai\EnhanceUnitTesting\source_files"
+TEST_FOLDER_PATH = r"D:\Sai\EnhanceUnitTesting\tests"
+RESULTS_FILE_PATH = r"D:/Sai/EnhanceUnitTesting/results.html"
 COVERAGE_REPORT_PATH = "coverage_report.txt"
 
 
@@ -95,11 +95,12 @@ def display_coverage_report():
         for line in lines:
             if "%" in line:  # Look for coverage percentage lines
                 parts = line.split()
-                if len(parts) >= 5:
+                if len(parts) >= 4:
                     data.append(parts)
 
         if data:
-            df = pd.DataFrame(data, columns=["File", "Statements", "Missed","Branch", "BrPart", "Coverage"])
+            #df = pd.DataFrame(data, columns=["File", "Statements", "Missed","Branch", "BrPart", "Coverage"])
+            df = pd.DataFrame(data, columns=["File", "Statements", "Missed", "Coverage"])
             df["Coverage"] = df["Coverage"].str.replace("%", "").astype(float)  # Convert coverage to numeric
 
             # Display as table
@@ -148,7 +149,7 @@ def main():
             st.markdown(f"[Click here to open results](file:///{RESULTS_FILE_PATH})", unsafe_allow_html=True)
         
             # Display coverage report in tabular format
-            #display_coverage_report()
+            display_coverage_report()
 
             # Uncomment to handle low coverage files
             # low_coverage_files = parse_low_coverage_files()

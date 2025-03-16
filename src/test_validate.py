@@ -16,11 +16,12 @@ def display_coverage_report(file_path):
             if "%" in line:  # Look for coverage percentage lines
                 parts = line.split()
                 print(parts)
-                if len(parts) >= 5:
+                if len(parts) >= 4:
                     data.append(parts)
         print(data)
         if data:
-            df = pd.DataFrame(data, columns=["File", "Statements", "Missed","Branch", "BrPart", "Coverage"])
+            #df = pd.DataFrame(data, columns=["File", "Statements", "Missed","Branch", "BrPart", "Coverage"])
+            df = pd.DataFrame(data, columns=["File", "Statements", "Missed", "Coverage"])
             df["Coverage"] = df["Coverage"].str.replace("%", "").astype(float)  # Convert coverage to numeric
 
         return df  
@@ -36,7 +37,7 @@ if __name__ == "__main__":
     # Print the path (optional, for debugging)
     print(f"File path: {file_path}")
     df1=display_coverage_report(file_path)
-    #print(df1)
+    print(df1)
     #low_coverage_files = parse_coverage_report(file_path)
     #print("\nFiles with less than 100% coverage:")
     #for file, coverage in low_coverage_files:
