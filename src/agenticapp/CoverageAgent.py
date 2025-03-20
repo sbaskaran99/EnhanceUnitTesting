@@ -3,13 +3,20 @@ import coverage
 # Start coverage before importing other modules
 cov = coverage.Coverage(omit=["*/tests/*", "*/__init__.py"], include=["*/source_files/*"])
 cov.start()
+import autogen
 from autogen import AssistantAgent, config_list_from_json
 import unittest
-import coverage
-
+import os
+from dotenv import load_dotenv
+# Load environment variables
+load_dotenv()
 # Load AI agent configurations
 config_path = r"D:\Sai\EnhanceUnitTesting\src\agenticapp\OAI_CONFIG_LIST.json"
 config_list = config_list_from_json(config_path)
+# Replace the placeholder with the actual API key from .env
+for config in config_list:
+    if "api_key" in config and config["api_key"] == "ENV_OPENAI_API_KEY":
+        config["api_key"] = os.getenv("OPENAI_API_KEY")
 
 coverage_agent = AssistantAgent(
     name="CoverageAgent",

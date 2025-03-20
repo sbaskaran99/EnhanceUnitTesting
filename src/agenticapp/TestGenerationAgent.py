@@ -23,6 +23,11 @@ logger = logging.getLogger(__name__)
 config_path = r"D:\Sai\EnhanceUnitTesting\src\agenticapp\OAI_CONFIG_LIST.json"
 config_list = autogen.config_list_from_json(config_path)
 
+# Replace the placeholder with the actual API key from .env
+for config in config_list:
+    if "api_key" in config and config["api_key"] == "ENV_OPENAI_API_KEY":
+        config["api_key"] = os.getenv("OPENAI_API_KEY")
+
 # Define Agents
 generation_agent = autogen.AssistantAgent(
     name="TestGenerationAgent",

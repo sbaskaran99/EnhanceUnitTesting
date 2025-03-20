@@ -10,4 +10,4 @@ pandas
 jinja2
 streamlit
 agentic_ai
-unittest
+autogen

@@ -9,7 +9,7 @@ import pandas as pd
 from TestGenerationAgent import process_file
 #from generate_tests_grok import process_file
 from parseCoverage import parse_coverage_report
-from generate_additionaltests import generate_and_update_tests
+from src.generate_additionaltests import generate_and_update_tests
 from TestExecutionAgent import discover_and_run_tests
 from CoverageAgent import measure_coverage
 from  AutoFixingAgent import fix_failing_tests

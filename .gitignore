@@ -14,3 +14,8 @@ unit_test_results.html
 unit_test_results.json
 .dot
 .png
+# Ignore sensitive config files
+src/OAI_CONFIG_LIST.json
+src/agenticapp/OAI_CONFIG_LIST.json
+src/OAI_CONFIG_LIST.json
+src/agenticapp/OAI_CONFIG_LIST.json
