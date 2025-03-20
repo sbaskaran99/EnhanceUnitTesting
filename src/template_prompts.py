@@ -55,9 +55,8 @@ def get_prompt(code_chunk, language="python", prompt_type="functionality", shot_
                 import os
                 current_dir = os.path.dirname(os.path.abspath(__file__))
                 # Remove 'tests' from the current directory path to find the root of the source files
-
                 source_files_root = current_dir.replace("\\tests", "\\source_files").replace("/tests", "/source_files")
-                # Function to recursively add parent directories to sys.path
+                 # Function to recursively add parent directories to sys.path
                 def add_parent_directories_to_sys_path(path):
                      while path not in sys.path and os.path.isdir(path):
                         sys.path.insert(0, path)
@@ -121,7 +120,7 @@ def get_prompt(code_chunk, language="python", prompt_type="functionality", shot_
                 - repository.save = MagicMock(side_effect=TypeError("Expected an instance of Order"))
                 - with self.assertRaises(TypeError):
                         repository.save(None)  
-            12. Generate individual test cases for ior each test data point separately               
+            12. Generate individual test cases for for each test data point separately               
             13. Add clear and descriptive comments for each test case to explain what is being tested and why.
             14.Include a setUp() method to reset any class-level counters or states before each test. 
             15.Ensure the generated code:
@@ -144,7 +143,8 @@ def get_prompt(code_chunk, language="python", prompt_type="functionality", shot_
             21 Automate for Multiple Files: The prompt can be fed into a script that processes multiple files. The script will:
             Extract methods/functions from each file.Use the template to generate unit test cases for each method.
             22.Ensure that special characters and external dependencies are handled properly across all files.
-            23.Ensure code compiles and correct any import errors
+            23.Remove all non-executable statements 
+            24.Ensure code compiles and correct any import errors
             Example:
     {examples}
     """

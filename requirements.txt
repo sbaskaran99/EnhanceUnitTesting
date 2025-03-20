@@ -9,3 +9,5 @@ cosmic-ray
 pandas
 jinja2
 streamlit
+agentic_ai
+unittest
