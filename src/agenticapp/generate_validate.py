@@ -9,7 +9,7 @@ import pandas as pd
 from TestGenerationAgent import process_file
 #from generate_tests_grok import process_file
 from parseCoverage import parse_coverage_report
-from src.generate_additionaltests import generate_and_update_tests
+from generate_additionaltests import generate_and_update_tests
 from TestExecutionAgent import discover_and_run_tests
 from CoverageAgent import measure_coverage
 from  AutoFixingAgent import fix_failing_tests
@@ -22,6 +22,7 @@ logging.basicConfig(level=logging.INFO)
 SOURCE_FOLDER_PATH = r"D:\Sai\EnhanceUnitTesting\source_files"
 TEST_FOLDER_PATH = r"D:\Sai\EnhanceUnitTesting\tests"
 RESULTS_FILE_PATH = r"D:/Sai/EnhanceUnitTesting/results.html"
+FIXED_TESTCASERESULTS_PATH=r"D:/Sai/EnhanceUnitTesting/fixed_testcaseresults.html"
 COVERAGE_REPORT_PATH = "coverage_report.txt"
 
 
@@ -109,60 +110,66 @@ def display_coverage_report():
             st.subheader("📊 Test Coverage Report")
             st.dataframe(df)
 
+import streamlit as st
+import os
+
 def main():
-    # Streamlit UI
     st.title('Effective Unit Testing Using LLMs')
-     
-    # File uploader for zip file
+
+    # Initialize session state variables
+    if "test_generated" not in st.session_state:
+        st.session_state.test_generated = False  # Track if test cases were generated
+    if "test_fixed" not in st.session_state:
+        st.session_state.test_fixed = False  # Track if test case issues were fixed
+
     uploaded_zip = st.file_uploader("Choose a zip file containing the source folder", type=["zip"])
 
     if uploaded_zip:
-        # Extract the zip file and get the folder path
         source_folder = extract_zip_file(uploaded_zip)
-               
-        # Copy source files to the designated folder
         copy_source_files(source_folder)
 
-        # Get the first-level subdirectory inside SOURCE_FOLDER_PATH
         subfolders = [f.name for f in os.scandir(SOURCE_FOLDER_PATH) if f.is_dir()]
-        root_folder = subfolders[0] if subfolders else None  # Handle case if no subfolders exist
+        root_folder = subfolders[0] if subfolders else None
         test_directory = os.path.join(TEST_FOLDER_PATH, root_folder) if root_folder else TEST_FOLDER_PATH
         os.makedirs(test_directory, exist_ok=True)
 
         if st.button('🚀 Generate Unit TestCases'):
             create_output_folder(test_directory)
-           
-            # Process the source files and create tests
             process_source_files(SOURCE_FOLDER_PATH, TEST_FOLDER_PATH)
-
-            # Run the tests with coverage
-            #run_tests_with_coverage(test_directory)
-
-            # Discover and run the tests
-            output_json = "results.json"
-            output_html = "results.html"
-            discover_and_run_tests(TEST_FOLDER_PATH, output_json, output_html)
+            discover_and_run_tests(TEST_FOLDER_PATH, "results.json", "results.html")
             measure_coverage(TEST_FOLDER_PATH)
-            # Show test results
+
+            st.session_state.test_generated = True
+            st.rerun()
+
+    # Ensure results are **always visible** if tests were generated
+    if st.session_state.test_generated:
+        st.subheader("📄 View Test Results")
+        st.markdown(f"[Click here to open results](file:///{RESULTS_FILE_PATH})", unsafe_allow_html=True)
+        display_coverage_report()
+
+        if st.button("⏳ Fix Test case issues..."):
+            st.write("Fix Test Case button clicked!")  # Debugging
+            # Clear cache before fixing test cases
+            st.cache_data.clear()
+            st.cache_resource.clear()
+            fix_failing_tests()
+            discover_and_run_tests(TEST_FOLDER_PATH, "fixed_testcaseresults.json", "fixed_testcaseresults.html")
+            measure_coverage(TEST_FOLDER_PATH)
+
+            st.session_state.test_fixed = True
+            st.rerun()
+
+    # Ensure improved test results **always** appear after fixing issues
+    if st.session_state.test_fixed:
+        with st.expander("🔧 Improved Test Cases"):
             st.subheader("📄 View Test Results")
             st.markdown(f"[Click here to open results](file:///{RESULTS_FILE_PATH})", unsafe_allow_html=True)
-        
-            # Display coverage report in tabular format
             display_coverage_report()
-            if st.button("⏳ Fix Test case issues..."):
-                fix_failing_tests()
-                discover_and_run_tests(TEST_FOLDER_PATH, output_json, output_html)
-                measure_coverage(TEST_FOLDER_PATH)
-                with st.expander("Improved Test cases"):
-                    st.subheader("📄 View Test Results")
-                    st.markdown(f"[Click here to open results](file:///{RESULTS_FILE_PATH})", unsafe_allow_html=True)
-                    display_coverage_report()
 
-   
-                
-                
-                
-            
+        if st.button("🚀 Deploy Again"):
+            st.success("✅ Deployment initiated successfully!")
+
             # Uncomment to handle low coverage files
             # low_coverage_files = parse_low_coverage_files()
             # if low_coverage_files:
