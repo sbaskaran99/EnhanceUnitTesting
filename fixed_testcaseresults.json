@@ -1,218 +1,163 @@
 {
-    "test_run_date": "2025-03-26T21:44:05.242529",
+    "test_run_date": "2025-03-26T23:00:45.473723",
     "results": [
         {
-            "test": "BankingApplication.test_account_0.TestAccount.test_deposit_invalid_negative",
-            "status": "PASS",
-            "reason": null
-        },
-        {
-            "test": "BankingApplication.test_account_0.TestAccount.test_deposit_invalid_zero",
-            "status": "PASS",
-            "reason": null
-        },
-        {
-            "test": "BankingApplication.test_account_0.TestAccount.test_deposit_valid",
-            "status": "PASS",
-            "reason": null
-        },
-        {
-            "test": "BankingApplication.test_account_0.TestAccount.test_get_balance",
-            "status": "PASS",
-            "reason": null
-        },
-        {
-            "test": "BankingApplication.test_account_0.TestAccount.test_str_representation",
+            "test": "OrderManagementSystem.app.model.test_order_0.TestOrder.test_empty_item",
             "status": "FAIL",
-            "reason": "Traceback (most recent call last):\n  File \"D:\\Sai\\EnhanceUnitTesting\\tests\\BankingApplication\\test_account_0.py\", line 65, in test_str_representation\n    self.assertEqual(str(self.account), expected_str)\nAssertionError: \"Account(ID=123456, Owner='John Doe', Balance=100.0)\" != \"Account(ID={self.account.account_number}, Owner='{se[46 chars]ce})\"\n- Account(ID=123456, Owner='John Doe', Balance=100.0)\n+ Account(ID={self.account.account_number}, Owner='{self.account.name}', Balance={self.account.balance})\n\n"
+            "reason": "Traceback (most recent call last):\n  File \"D:\\Sai\\EnhanceUnitTesting\\tests\\OrderManagementSystem\\app\\model\\test_order_0.py\", line 68, in test_empty_item\n    Order(\"\", 1)  # Item should not be empty\nAssertionError: ValueError not raised\n"
         },
         {
-            "test": "BankingApplication.test_account_0.TestAccount.test_withdraw_insufficient_funds",
+            "test": "OrderManagementSystem.app.model.test_order_0.TestOrder.test_invalid_id_negative",
+            "status": "FAIL",
+            "reason": "Traceback (most recent call last):\n  File \"D:\\Sai\\EnhanceUnitTesting\\tests\\OrderManagementSystem\\app\\model\\test_order_0.py\", line 78, in test_invalid_id_negative\n    Order(\"Peach\", 2)  # No direct way to set ID, but we can check indirectly\nAssertionError: ValueError not raised\n"
+        },
+        {
+            "test": "OrderManagementSystem.app.model.test_order_0.TestOrder.test_invalid_item_type",
+            "status": "FAIL",
+            "reason": "Traceback (most recent call last):\n  File \"D:\\Sai\\EnhanceUnitTesting\\tests\\OrderManagementSystem\\app\\model\\test_order_0.py\", line 42, in test_invalid_item_type\n    Order(123, 5)  # Item should be a string\nAssertionError: TypeError not raised\n"
+        },
+        {
+            "test": "OrderManagementSystem.app.model.test_order_0.TestOrder.test_invalid_quantity_type",
+            "status": "FAIL",
+            "reason": "Traceback (most recent call last):\n  File \"D:\\Sai\\EnhanceUnitTesting\\tests\\OrderManagementSystem\\app\\model\\test_order_0.py\", line 47, in test_invalid_quantity_type\n    Order(\"Orange\", \"two\")  # Quantity should be an integer\nAssertionError: TypeError not raised\n"
+        },
+        {
+            "test": "OrderManagementSystem.app.model.test_order_0.TestOrder.test_multiple_orders",
             "status": "PASS",
             "reason": null
         },
         {
-            "test": "BankingApplication.test_account_0.TestAccount.test_withdraw_invalid_negative",
+            "test": "OrderManagementSystem.app.model.test_order_0.TestOrder.test_negative_quantity",
+            "status": "FAIL",
+            "reason": "Traceback (most recent call last):\n  File \"D:\\Sai\\EnhanceUnitTesting\\tests\\OrderManagementSystem\\app\\model\\test_order_0.py\", line 57, in test_negative_quantity\n    Order(\"Peach\", -1)  # Quantity should be non-negative\nAssertionError: ValueError not raised\n"
+        },
+        {
+            "test": "OrderManagementSystem.app.model.test_order_0.TestOrder.test_null_item",
+            "status": "FAIL",
+            "reason": "Traceback (most recent call last):\n  File \"D:\\Sai\\EnhanceUnitTesting\\tests\\OrderManagementSystem\\app\\model\\test_order_0.py\", line 73, in test_null_item\n    Order(None, 1)  # Item should not be None\nAssertionError: TypeError not raised\n"
+        },
+        {
+            "test": "OrderManagementSystem.app.model.test_order_0.TestOrder.test_string_representation",
             "status": "PASS",
             "reason": null
         },
         {
-            "test": "BankingApplication.test_account_0.TestAccount.test_withdraw_invalid_zero",
+            "test": "OrderManagementSystem.app.model.test_order_0.TestOrder.test_valid_order_creation",
             "status": "PASS",
             "reason": null
         },
         {
-            "test": "BankingApplication.test_account_0.TestAccount.test_withdraw_valid",
+            "test": "OrderManagementSystem.app.model.test_order_0.TestOrder.test_zero_quantity",
             "status": "PASS",
             "reason": null
         },
         {
-            "test": "BankingApplication.test_bank_0.TestBank.test_create_account_duplicate_account_number",
-            "status": "PASS",
-            "reason": null
-        },
-        {
-            "test": "BankingApplication.test_bank_0.TestBank.test_create_account_empty_account_number",
-            "status": "PASS",
-            "reason": null
-        },
-        {
-            "test": "BankingApplication.test_bank_0.TestBank.test_create_account_empty_name",
-            "status": "PASS",
-            "reason": null
-        },
-        {
-            "test": "BankingApplication.test_bank_0.TestBank.test_create_account_negative_initial_deposit",
-            "status": "PASS",
-            "reason": null
-        },
-        {
-            "test": "BankingApplication.test_bank_0.TestBank.test_create_account_valid",
-            "status": "PASS",
-            "reason": null
-        },
-        {
-            "test": "BankingApplication.test_bank_0.TestBank.test_get_account_not_found",
-            "status": "PASS",
-            "reason": null
-        },
-        {
-            "test": "BankingApplication.test_bank_0.TestBank.test_get_account_valid",
-            "status": "PASS",
-            "reason": null
-        },
-        {
-            "test": "BankingApplication.test_exceptions_0.TestBankingExceptions.test_account_not_found_exception",
-            "status": "PASS",
-            "reason": null
-        },
-        {
-            "test": "BankingApplication.test_exceptions_0.TestBankingExceptions.test_banking_exception",
-            "status": "PASS",
-            "reason": null
-        },
-        {
-            "test": "BankingApplication.test_exceptions_0.TestBankingExceptions.test_empty_input",
-            "status": "PASS",
-            "reason": null
-        },
-        {
-            "test": "BankingApplication.test_exceptions_0.TestBankingExceptions.test_insufficient_funds_exception",
-            "status": "PASS",
-            "reason": null
-        },
-        {
-            "test": "BankingApplication.test_exceptions_0.TestBankingExceptions.test_invalid_id_negative",
-            "status": "PASS",
-            "reason": null
-        },
-        {
-            "test": "BankingApplication.test_exceptions_0.TestBankingExceptions.test_invalid_id_zero",
-            "status": "PASS",
-            "reason": null
-        },
-        {
-            "test": "BankingApplication.test_exceptions_0.TestBankingExceptions.test_invalid_type",
-            "status": "PASS",
-            "reason": null
-        },
-        {
-            "test": "BankingApplication.test_exceptions_0.TestBankingExceptions.test_null_input",
-            "status": "PASS",
-            "reason": null
-        },
-        {
-            "test": "BankingApplication.test_main_0.TestBankAndTransactionManager.test_boundary_balance",
+            "test": "OrderManagementSystem.app.repository.test_in_memory_order_repository_0.TestInMemoryOrderRepository.test_find_all_after_saving_multiple_orders",
             "status": "ERROR",
-            "reason": "Traceback (most recent call last):\n  File \"D:\\Sai\\EnhanceUnitTesting\\tests\\BankingApplication\\test_main_0.py\", line 73, in test_boundary_balance\n    self.transaction_manager.deposit(\"12345\", 0.0)\n  File \"D:\\Sai\\EnhanceUnitTesting\\source_files\\BankingApplication\\transactions.py\", line 9, in deposit\n    raise ValueError(\"Deposit amount must be positive\")\nValueError: Deposit amount must be positive\n"
+            "reason": "Traceback (most recent call last):\n  File \"D:\\Sai\\EnhanceUnitTesting\\tests\\OrderManagementSystem\\app\\repository\\test_in_memory_order_repository_0.py\", line 68, in test_find_all_after_saving_multiple_orders\n    order1 = Order(\"Grapes\", 4, id=4)\nTypeError: __init__() got an unexpected keyword argument 'id'\n"
         },
         {
-            "test": "BankingApplication.test_main_0.TestBankAndTransactionManager.test_empty_account_id",
+            "test": "OrderManagementSystem.app.repository.test_in_memory_order_repository_0.TestInMemoryOrderRepository.test_find_all_empty",
             "status": "PASS",
             "reason": null
         },
         {
-            "test": "BankingApplication.test_main_0.TestBankAndTransactionManager.test_invalid_account_id",
+            "test": "OrderManagementSystem.app.repository.test_in_memory_order_repository_0.TestInMemoryOrderRepository.test_find_by_id_invalid",
             "status": "PASS",
             "reason": null
         },
         {
-            "test": "BankingApplication.test_main_0.TestBankAndTransactionManager.test_negative_deposit",
-            "status": "PASS",
-            "reason": null
-        },
-        {
-            "test": "BankingApplication.test_main_0.TestBankAndTransactionManager.test_negative_withdraw",
-            "status": "PASS",
-            "reason": null
-        },
-        {
-            "test": "BankingApplication.test_main_0.TestBankAndTransactionManager.test_null_account_id",
-            "status": "PASS",
-            "reason": null
-        },
-        {
-            "test": "BankingApplication.test_main_0.TestBankAndTransactionManager.test_string_representation",
+            "test": "OrderManagementSystem.app.repository.test_in_memory_order_repository_0.TestInMemoryOrderRepository.test_find_by_id_negative_id",
             "status": "FAIL",
-            "reason": "Traceback (most recent call last):\n  File \"D:\\Sai\\EnhanceUnitTesting\\tests\\BankingApplication\\test_main_0.py\", line 81, in test_string_representation\n    self.assertEqual(str(account), expected_str)\nAssertionError: \"Account(ID=12345, Owner='John Doe', Balance=1000.0)\" != 'Account(ID=12345, Name=John Doe, Balance=1000.0)'\n- Account(ID=12345, Owner='John Doe', Balance=1000.0)\n?                   ^^^ - -        -\n+ Account(ID=12345, Name=John Doe, Balance=1000.0)\n?                   ^^^\n\n"
+            "reason": "Traceback (most recent call last):\n  File \"D:\\Sai\\EnhanceUnitTesting\\tests\\OrderManagementSystem\\app\\repository\\test_in_memory_order_repository_0.py\", line 54, in test_find_by_id_negative_id\n    self.repository.find_by_id(-1)\nAssertionError: ValueError not raised\n"
         },
         {
-            "test": "BankingApplication.test_main_0.TestBankAndTransactionManager.test_valid_deposit",
+            "test": "OrderManagementSystem.app.repository.test_in_memory_order_repository_0.TestInMemoryOrderRepository.test_find_by_id_valid",
+            "status": "ERROR",
+            "reason": "Traceback (most recent call last):\n  File \"D:\\Sai\\EnhanceUnitTesting\\tests\\OrderManagementSystem\\app\\repository\\test_in_memory_order_repository_0.py\", line 33, in test_find_by_id_valid\n    order = Order(\"Banana\", 2, id=2)\nTypeError: __init__() got an unexpected keyword argument 'id'\n"
+        },
+        {
+            "test": "OrderManagementSystem.app.repository.test_in_memory_order_repository_0.TestInMemoryOrderRepository.test_find_by_id_zero_id",
+            "status": "FAIL",
+            "reason": "Traceback (most recent call last):\n  File \"D:\\Sai\\EnhanceUnitTesting\\tests\\OrderManagementSystem\\app\\repository\\test_in_memory_order_repository_0.py\", line 59, in test_find_by_id_zero_id\n    self.repository.find_by_id(0)\nAssertionError: ValueError not raised\n"
+        },
+        {
+            "test": "OrderManagementSystem.app.repository.test_in_memory_order_repository_0.TestInMemoryOrderRepository.test_save_invalid_order",
+            "status": "ERROR",
+            "reason": "Traceback (most recent call last):\n  File \"D:\\Sai\\EnhanceUnitTesting\\tests\\OrderManagementSystem\\app\\repository\\test_in_memory_order_repository_0.py\", line 49, in test_save_invalid_order\n    self.repository.save(Order(\"Orange\", 3, id=-1))\nTypeError: __init__() got an unexpected keyword argument 'id'\n"
+        },
+        {
+            "test": "OrderManagementSystem.app.repository.test_in_memory_order_repository_0.TestInMemoryOrderRepository.test_save_none_order",
+            "status": "FAIL",
+            "reason": "Traceback (most recent call last):\n  File \"D:\\Sai\\EnhanceUnitTesting\\tests\\OrderManagementSystem\\app\\repository\\test_in_memory_order_repository_0.py\", line 64, in test_save_none_order\n    self.repository.save(None)\nAssertionError: TypeError not raised\n"
+        },
+        {
+            "test": "OrderManagementSystem.app.repository.test_in_memory_order_repository_0.TestInMemoryOrderRepository.test_save_valid_order",
+            "status": "ERROR",
+            "reason": "Traceback (most recent call last):\n  File \"D:\\Sai\\EnhanceUnitTesting\\tests\\OrderManagementSystem\\app\\repository\\test_in_memory_order_repository_0.py\", line 27, in test_save_valid_order\n    order = Order(\"Apple\", 1, id=1)\nTypeError: __init__() got an unexpected keyword argument 'id'\n"
+        },
+        {
+            "test": "OrderManagementSystem.app.repository.test_order_repository_0.TestOrderRepository.test_find_all_empty",
             "status": "PASS",
             "reason": null
         },
         {
-            "test": "BankingApplication.test_main_0.TestBankAndTransactionManager.test_valid_withdraw",
+            "test": "OrderManagementSystem.app.repository.test_order_repository_0.TestOrderRepository.test_find_all_with_orders",
             "status": "PASS",
             "reason": null
         },
         {
-            "test": "BankingApplication.test_main_0.TestBankAndTransactionManager.test_withdraw_exceeding_balance",
+            "test": "OrderManagementSystem.app.repository.test_order_repository_0.TestOrderRepository.test_find_by_id_invalid",
             "status": "PASS",
             "reason": null
         },
         {
-            "test": "BankingApplication.test_transactions_0.TestTransactionManager.test_deposit_invalid_account",
+            "test": "OrderManagementSystem.app.repository.test_order_repository_0.TestOrderRepository.test_find_by_id_valid",
+            "status": "FAIL",
+            "reason": "Traceback (most recent call last):\n  File \"D:\\Sai\\EnhanceUnitTesting\\tests\\OrderManagementSystem\\app\\repository\\test_order_repository_0.py\", line 56, in test_find_by_id_valid\n    self.assertEqual(found_order.item, \"Apple\")\nAssertionError: 'Banana' != 'Apple'\n- Banana\n+ Apple\n\n"
+        },
+        {
+            "test": "OrderManagementSystem.app.repository.test_order_repository_0.TestOrderRepository.test_find_by_id_zero",
             "status": "PASS",
             "reason": null
         },
         {
-            "test": "BankingApplication.test_transactions_0.TestTransactionManager.test_deposit_negative_amount",
+            "test": "OrderManagementSystem.app.repository.test_order_repository_0.TestOrderRepository.test_save_invalid_order_type",
             "status": "PASS",
             "reason": null
         },
         {
-            "test": "BankingApplication.test_transactions_0.TestTransactionManager.test_deposit_valid",
+            "test": "OrderManagementSystem.app.repository.test_order_repository_0.TestOrderRepository.test_save_valid_order",
             "status": "PASS",
             "reason": null
         },
         {
-            "test": "BankingApplication.test_transactions_0.TestTransactionManager.test_deposit_zero_amount",
+            "test": "OrderManagementSystem.app.service.test_order_service_0.TestOrderService.test_create_order_negative_quantity",
             "status": "PASS",
             "reason": null
         },
         {
-            "test": "BankingApplication.test_transactions_0.TestTransactionManager.test_withdraw_insufficient_funds",
+            "test": "OrderManagementSystem.app.service.test_order_service_0.TestOrderService.test_create_order_valid",
             "status": "PASS",
             "reason": null
         },
         {
-            "test": "BankingApplication.test_transactions_0.TestTransactionManager.test_withdraw_invalid_account",
+            "test": "OrderManagementSystem.app.service.test_order_service_0.TestOrderService.test_create_order_zero_quantity",
             "status": "PASS",
             "reason": null
         },
         {
-            "test": "BankingApplication.test_transactions_0.TestTransactionManager.test_withdraw_negative_amount",
+            "test": "OrderManagementSystem.app.service.test_order_service_0.TestOrderService.test_get_all_orders",
             "status": "PASS",
             "reason": null
         },
         {
-            "test": "BankingApplication.test_transactions_0.TestTransactionManager.test_withdraw_valid",
+            "test": "OrderManagementSystem.app.service.test_order_service_0.TestOrderService.test_get_order_by_id_invalid",
             "status": "PASS",
             "reason": null
         },
         {
-            "test": "BankingApplication.test_transactions_0.TestTransactionManager.test_withdraw_zero_amount",
+            "test": "OrderManagementSystem.app.service.test_order_service_0.TestOrderService.test_get_order_by_id_valid",
             "status": "PASS",
             "reason": null
         }

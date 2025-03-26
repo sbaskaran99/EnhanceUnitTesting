@@ -1,7 +1,7 @@
 import coverage
 import pandas as pd
 # Start coverage before importing other modules
-cov = coverage.Coverage(omit=["*/tests/*", "*/__init__.py"], include=["*/source_files/*"])
+cov = coverage.Coverage(omit=["*/tests/*", "*/__init__.py"], include=["*/source_files/*"],branch=True)
 cov.start()
 import autogen
 from autogen import AssistantAgent, config_list_from_json
@@ -62,12 +62,12 @@ def display_coverage_report(COVERAGE_REPORT_PATH):
         for line in lines:
             if "%" in line:  # Look for coverage percentage lines
                 parts = line.split()
-                if len(parts) >= 4:
+                if len(parts) >= 6:
                     data.append(parts)
 
         if data:
             #df = pd.DataFrame(data, columns=["File", "Statements", "Missed","Branch", "BrPart", "Coverage"])
-            df = pd.DataFrame(data, columns=["File", "Statements", "Missed", "Coverage"])
+            df = pd.DataFrame(data, columns=["File", "Statements", "Missed","Branches", "BrMissed", "Coverage"])
             df["Coverage"] = df["Coverage"].str.replace("%", "").astype(float)  # Convert coverage to numeric
 
         return df   

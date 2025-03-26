@@ -95,7 +95,7 @@ import streamlit as st
 import os
 
 def main():
-    st.title('Effective Unit Testing Using LLMs')
+    st.title('Enhance Unit Testing Using LLMs')
 
     # Initialize session state variables
     if "test_generated" not in st.session_state:
