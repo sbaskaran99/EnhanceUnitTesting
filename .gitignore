@@ -1,0 +1,16 @@
+.env
+env
+__pycache__/
+*.pyc
+*.log
+tests/
+source_files/
+.coverage
+coverage_report.html
+coverage_report.txt
+results.html
+results.json
+unit_test_results.html
+unit_test_results.json
+.dot
+.png

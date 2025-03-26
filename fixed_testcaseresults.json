@@ -1,0 +1,220 @@
+{
+    "test_run_date": "2025-03-26T21:44:05.242529",
+    "results": [
+        {
+            "test": "BankingApplication.test_account_0.TestAccount.test_deposit_invalid_negative",
+            "status": "PASS",
+            "reason": null
+        },
+        {
+            "test": "BankingApplication.test_account_0.TestAccount.test_deposit_invalid_zero",
+            "status": "PASS",
+            "reason": null
+        },
+        {
+            "test": "BankingApplication.test_account_0.TestAccount.test_deposit_valid",
+            "status": "PASS",
+            "reason": null
+        },
+        {
+            "test": "BankingApplication.test_account_0.TestAccount.test_get_balance",
+            "status": "PASS",
+            "reason": null
+        },
+        {
+            "test": "BankingApplication.test_account_0.TestAccount.test_str_representation",
+            "status": "FAIL",
+            "reason": "Traceback (most recent call last):\n  File \"D:\\Sai\\EnhanceUnitTesting\\tests\\BankingApplication\\test_account_0.py\", line 65, in test_str_representation\n    self.assertEqual(str(self.account), expected_str)\nAssertionError: \"Account(ID=123456, Owner='John Doe', Balance=100.0)\" != \"Account(ID={self.account.account_number}, Owner='{se[46 chars]ce})\"\n- Account(ID=123456, Owner='John Doe', Balance=100.0)\n+ Account(ID={self.account.account_number}, Owner='{self.account.name}', Balance={self.account.balance})\n\n"
+        },
+        {
+            "test": "BankingApplication.test_account_0.TestAccount.test_withdraw_insufficient_funds",
+            "status": "PASS",
+            "reason": null
+        },
+        {
+            "test": "BankingApplication.test_account_0.TestAccount.test_withdraw_invalid_negative",
+            "status": "PASS",
+            "reason": null
+        },
+        {
+            "test": "BankingApplication.test_account_0.TestAccount.test_withdraw_invalid_zero",
+            "status": "PASS",
+            "reason": null
+        },
+        {
+            "test": "BankingApplication.test_account_0.TestAccount.test_withdraw_valid",
+            "status": "PASS",
+            "reason": null
+        },
+        {
+            "test": "BankingApplication.test_bank_0.TestBank.test_create_account_duplicate_account_number",
+            "status": "PASS",
+            "reason": null
+        },
+        {
+            "test": "BankingApplication.test_bank_0.TestBank.test_create_account_empty_account_number",
+            "status": "PASS",
+            "reason": null
+        },
+        {
+            "test": "BankingApplication.test_bank_0.TestBank.test_create_account_empty_name",
+            "status": "PASS",
+            "reason": null
+        },
+        {
+            "test": "BankingApplication.test_bank_0.TestBank.test_create_account_negative_initial_deposit",
+            "status": "PASS",
+            "reason": null
+        },
+        {
+            "test": "BankingApplication.test_bank_0.TestBank.test_create_account_valid",
+            "status": "PASS",
+            "reason": null
+        },
+        {
+            "test": "BankingApplication.test_bank_0.TestBank.test_get_account_not_found",
+            "status": "PASS",
+            "reason": null
+        },
+        {
+            "test": "BankingApplication.test_bank_0.TestBank.test_get_account_valid",
+            "status": "PASS",
+            "reason": null
+        },
+        {
+            "test": "BankingApplication.test_exceptions_0.TestBankingExceptions.test_account_not_found_exception",
+            "status": "PASS",
+            "reason": null
+        },
+        {
+            "test": "BankingApplication.test_exceptions_0.TestBankingExceptions.test_banking_exception",
+            "status": "PASS",
+            "reason": null
+        },
+        {
+            "test": "BankingApplication.test_exceptions_0.TestBankingExceptions.test_empty_input",
+            "status": "PASS",
+            "reason": null
+        },
+        {
+            "test": "BankingApplication.test_exceptions_0.TestBankingExceptions.test_insufficient_funds_exception",
+            "status": "PASS",
+            "reason": null
+        },
+        {
+            "test": "BankingApplication.test_exceptions_0.TestBankingExceptions.test_invalid_id_negative",
+            "status": "PASS",
+            "reason": null
+        },
+        {
+            "test": "BankingApplication.test_exceptions_0.TestBankingExceptions.test_invalid_id_zero",
+            "status": "PASS",
+            "reason": null
+        },
+        {
+            "test": "BankingApplication.test_exceptions_0.TestBankingExceptions.test_invalid_type",
+            "status": "PASS",
+            "reason": null
+        },
+        {
+            "test": "BankingApplication.test_exceptions_0.TestBankingExceptions.test_null_input",
+            "status": "PASS",
+            "reason": null
+        },
+        {
+            "test": "BankingApplication.test_main_0.TestBankAndTransactionManager.test_boundary_balance",
+            "status": "ERROR",
+            "reason": "Traceback (most recent call last):\n  File \"D:\\Sai\\EnhanceUnitTesting\\tests\\BankingApplication\\test_main_0.py\", line 73, in test_boundary_balance\n    self.transaction_manager.deposit(\"12345\", 0.0)\n  File \"D:\\Sai\\EnhanceUnitTesting\\source_files\\BankingApplication\\transactions.py\", line 9, in deposit\n    raise ValueError(\"Deposit amount must be positive\")\nValueError: Deposit amount must be positive\n"
+        },
+        {
+            "test": "BankingApplication.test_main_0.TestBankAndTransactionManager.test_empty_account_id",
+            "status": "PASS",
+            "reason": null
+        },
+        {
+            "test": "BankingApplication.test_main_0.TestBankAndTransactionManager.test_invalid_account_id",
+            "status": "PASS",
+            "reason": null
+        },
+        {
+            "test": "BankingApplication.test_main_0.TestBankAndTransactionManager.test_negative_deposit",
+            "status": "PASS",
+            "reason": null
+        },
+        {
+            "test": "BankingApplication.test_main_0.TestBankAndTransactionManager.test_negative_withdraw",
+            "status": "PASS",
+            "reason": null
+        },
+        {
+            "test": "BankingApplication.test_main_0.TestBankAndTransactionManager.test_null_account_id",
+            "status": "PASS",
+            "reason": null
+        },
+        {
+            "test": "BankingApplication.test_main_0.TestBankAndTransactionManager.test_string_representation",
+            "status": "FAIL",
+            "reason": "Traceback (most recent call last):\n  File \"D:\\Sai\\EnhanceUnitTesting\\tests\\BankingApplication\\test_main_0.py\", line 81, in test_string_representation\n    self.assertEqual(str(account), expected_str)\nAssertionError: \"Account(ID=12345, Owner='John Doe', Balance=1000.0)\" != 'Account(ID=12345, Name=John Doe, Balance=1000.0)'\n- Account(ID=12345, Owner='John Doe', Balance=1000.0)\n?                   ^^^ - -        -\n+ Account(ID=12345, Name=John Doe, Balance=1000.0)\n?                   ^^^\n\n"
+        },
+        {
+            "test": "BankingApplication.test_main_0.TestBankAndTransactionManager.test_valid_deposit",
+            "status": "PASS",
+            "reason": null
+        },
+        {
+            "test": "BankingApplication.test_main_0.TestBankAndTransactionManager.test_valid_withdraw",
+            "status": "PASS",
+            "reason": null
+        },
+        {
+            "test": "BankingApplication.test_main_0.TestBankAndTransactionManager.test_withdraw_exceeding_balance",
+            "status": "PASS",
+            "reason": null
+        },
+        {
+            "test": "BankingApplication.test_transactions_0.TestTransactionManager.test_deposit_invalid_account",
+            "status": "PASS",
+            "reason": null
+        },
+        {
+            "test": "BankingApplication.test_transactions_0.TestTransactionManager.test_deposit_negative_amount",
+            "status": "PASS",
+            "reason": null
+        },
+        {
+            "test": "BankingApplication.test_transactions_0.TestTransactionManager.test_deposit_valid",
+            "status": "PASS",
+            "reason": null
+        },
+        {
+            "test": "BankingApplication.test_transactions_0.TestTransactionManager.test_deposit_zero_amount",
+            "status": "PASS",
+            "reason": null
+        },
+        {
+            "test": "BankingApplication.test_transactions_0.TestTransactionManager.test_withdraw_insufficient_funds",
+            "status": "PASS",
+            "reason": null
+        },
+        {
+            "test": "BankingApplication.test_transactions_0.TestTransactionManager.test_withdraw_invalid_account",
+            "status": "PASS",
+            "reason": null
+        },
+        {
+            "test": "BankingApplication.test_transactions_0.TestTransactionManager.test_withdraw_negative_amount",
+            "status": "PASS",
+            "reason": null
+        },
+        {
+            "test": "BankingApplication.test_transactions_0.TestTransactionManager.test_withdraw_valid",
+            "status": "PASS",
+            "reason": null
+        },
+        {
+            "test": "BankingApplication.test_transactions_0.TestTransactionManager.test_withdraw_zero_amount",
+            "status": "PASS",
+            "reason": null
+        }
+    ]
+}
