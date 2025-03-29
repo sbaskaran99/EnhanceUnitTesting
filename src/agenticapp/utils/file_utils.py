@@ -63,3 +63,15 @@ def clear_directories(directories_to_clear):
         except Exception as e:
             print(f"Error clearing directory {directory}: {e}")
 
+def find_test_file(source_file, test_dir):
+    # Derive the base name of the source file without extension
+    base_name = os.path.splitext(os.path.basename(source_file))[0]
+    # Search for test files with numeric suffixes
+    for i in range(10):  # Adjust the range as needed
+        test_file_name = f"test_{base_name}_{i}.py"
+        test_file_path = os.path.join(test_dir, test_file_name)
+        if os.path.exists(test_file_path):
+            #print(f"Found test file: {test_file_path}")
+            return test_file_path
+    print(f"No test file found for {source_file}.")
+    return None 
