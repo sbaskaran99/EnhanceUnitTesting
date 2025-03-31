@@ -14,7 +14,7 @@ from TestGenerationAgent import clean_generated_code  # External function to cle
 # --------------------------
 load_dotenv()
 
-config_path = r"D:\Sai\EnhanceUnitTesting\src\agenticapp\OAI_CONFIG_LIST.json"
+config_path = r"D:\Sai\EnhanceUnitTesting\src\agenticapp\COVERAGE_CONFIG_LIST.json"
 config_list = config_list_from_json(config_path)
 
 for config in config_list:
@@ -127,13 +127,14 @@ import textwrap
 def reindent_generated_code(generated_code, base_indent="    "):
     """
     Reindents the generated code by:
-      - Dedenting the entire block (removing any common leading whitespace).
+      - Removing common leading whitespace (dedenting).
       - Ensuring function definitions have the correct indentation.
-      - Indenting function bodies one level deeper than the function definition.
+      - Indenting function bodies one level deeper.
+      - Handling nested structures (e.g., with, if, for) at deeper levels.
     
     Parameters:
       generated_code (str): The code block to reindent.
-      base_indent (str): The indent to prepend (e.g., class indent + 4 spaces).
+      base_indent (str): The indent to prepend (default: 4 spaces).
     
     Returns:
       str: The properly reindented code.
@@ -141,21 +142,29 @@ def reindent_generated_code(generated_code, base_indent="    "):
     dedented = textwrap.dedent(generated_code)
     lines = dedented.splitlines()
     formatted_lines = []
-    inside_function = False  # Tracks if we are inside a function block
+    inside_function = False  # Tracks if we are inside a function
+    inside_nested_block = False  # Tracks if we are inside a `with`, `if`, `for`, `while` block
 
     for line in lines:
         stripped = line.lstrip()
 
-        # If line starts with `def`, it's a function definition
-        if stripped.startswith("def "):
+        if stripped.startswith("def "):  # Function definition
             formatted_lines.append(base_indent + stripped)
-            inside_function = True  # Next lines should be further indented
-        elif inside_function and stripped:  # Indent function body lines
-            formatted_lines.append(base_indent * 2 + stripped)
+            inside_function = True  # Function body starts in the next lines
+            inside_nested_block = False  # Reset nested block status
+        elif inside_function and stripped:  # Function body (2nd level)
+            if stripped.startswith(("with ", "if ", "for ", "while ")):  # Nested structures (3rd level)
+                formatted_lines.append(base_indent * 2 + stripped)
+                inside_nested_block = True  # Next line should be at level 3
+            elif inside_nested_block:  # Inside `with`, `if`, etc. (3rd level)
+                formatted_lines.append(base_indent * 3 + stripped)
+                inside_nested_block = False  # Reset after handling one nested level
+            else:
+                formatted_lines.append(base_indent * 2 + stripped)  # Normal function body
         elif not stripped:  # Preserve blank lines
             formatted_lines.append("")
         else:
-            formatted_lines.append(base_indent + stripped)  # Regular line
+            formatted_lines.append(base_indent + stripped)  # Regular line outside function
 
     return "\n".join(formatted_lines) + "\n"
 
@@ -275,13 +284,25 @@ def generate_and_update_tests(coverage_report_file, test_folder):
         except Exception as e:
             print(f"⚠️ Could not read test file {test_file}: {e}")
             test_file_content = ""
-        
+        print(missing_branches)
         prompt = (
             f"Generate missing test cases for the file {file_name}.\n"
             f"Coverage is {coverage}%. Missing statements: {missing_statements}, missing branches: {missing_branches}.\n\n"
             f"--- Source Code ---\n{source_content}\n\n"
             f"--- Existing Test Cases ---\n{test_file_content}\n\n"
             f"Ensure all conditional branches, including nested conditions and edge cases, are covered.Test cases should trigger different execution paths, including combinations of conditions where applicable."
+            f"Pay special attention to nested 'if' conditions and ensure all logical paths are exercised. "
+            f"For example, if an 'if' statement contains 'if A and B:', test cases must include:\n"
+            f" - A=True, B=True\n"
+            f" - A=True, B=False\n"
+            f" - A=False, B=True\n"
+            f" - A=False, B=False\n"
+             f"Similarly, if an 'if' statement contains 'if A or B:', include cases for:\n"
+            f" - A=True, B=True\n"
+            f" - A=True, B=False\n"
+            f" - A=False, B=True\n"
+            f" - A=False, B=False\n"
+            f"Test each if conditions for  both postive and negative values"
             f"Each test method should be defined with a 'self' parameter (e.g. 'def test_example(self):'). "
             f"Provide only valid Python test functions (starting with 'def test_') without the class header. "
             f"Do not include any markdown formatting such as ``` or ```python or instructional text."

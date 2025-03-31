@@ -14,7 +14,7 @@ from TestGenerationAgent import clean_generated_code  # External function to cle
 # --------------------------
 load_dotenv()
 
-config_path = r"D:\Sai\EnhanceUnitTesting\src\agenticapp\OAI_CONFIG_LIST.json"
+config_path = r"D:\Sai\EnhanceUnitTesting\src\agenticapp\COVERAGE_CONFIG_LIST.json"
 config_list = config_list_from_json(config_path)
 
 for config in config_list:
@@ -73,6 +73,33 @@ def measure_coverage(test_folder, coverage_report_file="coverage_report.txt"):
     print(f"✅ Coverage report saved to {coverage_report_file}")
     print("📊 HTML report generated in 'coverage_html_report/'")
 
+def parse_coverage_report(file_path):
+    """
+    Reads the text coverage report and returns a list of tuples:
+    (file_path, missing_statements, missing_branches, coverage_percent)
+    """
+    low_coverage_files = []
+    with open(file_path, "r", encoding="utf-8") as file:
+        lines = file.readlines()
+    for line in lines:
+        line = line.replace("\x00", "").strip()
+        if "TOTAL" in line or "Name" in line or "-----" in line:
+            continue
+        # Expected format: File  Stmts  Miss  Branch  BrPart  Cover
+        match = re.match(r"(\S+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)%", line)
+        if match:
+            file_name = match.group(1).strip()
+            total_statements = int(match.group(2))
+            missing_statements = int(match.group(3))
+            total_branches = int(match.group(4))
+            missing_branches = int(match.group(5))
+            coverage_percent = int(match.group(6))
+            if coverage_percent < 100:
+                low_coverage_files.append((file_name, missing_statements, missing_branches, coverage_percent))
+    return low_coverage_files
+
+
+import textwrap
 def display_coverage_report(COVERAGE_REPORT_PATH):
     """Read and display coverage report in a tabular format."""
     if os.path.exists(COVERAGE_REPORT_PATH):
@@ -95,63 +122,55 @@ def display_coverage_report(COVERAGE_REPORT_PATH):
         return df   
     
 
-def parse_coverage_report(file_path):
-    """
-    Reads the text coverage report and returns a list of tuples:
-    (file_path, missing_branch_count, coverage_percent)
-    """
-    low_coverage_files = []
-    with open(file_path, "r", encoding="utf-8") as file:
-        lines = file.readlines()
-    for line in lines:
-        line = line.replace("\x00", "").strip()
-        if "TOTAL" in line or "Name" in line or "-----" in line:
-            continue
-        match = re.match(r"(\S+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)%", line)
-        if match:
-            file_name = match.group(1).strip()
-            missing_branches = int(match.group(5))
-            coverage_percent = int(match.group(6))
-            if coverage_percent < 100:
-                low_coverage_files.append((file_name, missing_branches, coverage_percent))
-    return low_coverage_files
+import textwrap
 
 def reindent_generated_code(generated_code, base_indent="    "):
     """
-    Reindents the generated code:
-      - Finds the minimal indentation among non-empty lines.
-      - Removes that minimal indent and prepends base_indent to each line.
-    Returns the reindented code.
+    Reindents the generated code by:
+      - Dedenting the entire block (removing any common leading whitespace).
+      - Ensuring function definitions have the correct indentation.
+      - Indenting function bodies one level deeper than the function definition.
+    
+    Parameters:
+      generated_code (str): The code block to reindent.
+      base_indent (str): The indent to prepend (e.g., class indent + 4 spaces).
+    
+    Returns:
+      str: The properly reindented code.
     """
-    lines = generated_code.splitlines()
-    min_indent = None
+    dedented = textwrap.dedent(generated_code)
+    lines = dedented.splitlines()
+    formatted_lines = []
+    inside_function = False  # Tracks if we are inside a function block
+
     for line in lines:
-        if line.strip():
-            leading_spaces = len(line) - len(line.lstrip())
-            if min_indent is None or leading_spaces < min_indent:
-                min_indent = leading_spaces
-    if min_indent is None:
-        min_indent = 0
-    new_lines = []
-    for line in lines:
-        if line.strip():
-            new_lines.append(base_indent + line[min_indent:])
+        stripped = line.lstrip()
+
+        # If line starts with `def`, it's a function definition
+        if stripped.startswith("def "):
+            formatted_lines.append(base_indent + stripped)
+            inside_function = True  # Next lines should be further indented
+        elif inside_function and stripped:  # Indent function body lines
+            formatted_lines.append(base_indent * 2 + stripped)
+        elif not stripped:  # Preserve blank lines
+            formatted_lines.append("")
         else:
-            new_lines.append("")
-    return "\n".join(new_lines) + "\n"
+            formatted_lines.append(base_indent + stripped)  # Regular line
+
+    return "\n".join(formatted_lines) + "\n"
+
+
+
+
 
 def insert_tests_into_existing_class(existing_lines, new_test_methods):
     """
     Inserts the new test methods into the first class in the file that is a subclass of unittest.TestCase,
     just before the main block (or at the end of the file if no main block exists).
+    
     The new test methods should already be properly reindented.
     
-    Parameters:
-      existing_lines (list): Lines from the test file.
-      new_test_methods (str): New test method definitions to insert.
-    
-    Returns:
-      list: Updated list of lines with new test methods inserted into the class.
+    Returns the updated list of lines.
     """
     updated_lines = []
     class_found = False
@@ -196,8 +215,8 @@ def update_test_file(test_file, generated_code):
         lines = f.readlines()
     
     # Find the class indent from the first unittest.TestCase subclass.
-    class_indent = ""
     import re
+    class_indent = ""
     for line in lines:
         m = re.search(r"^(\s*)class\s+\w+\(unittest\.TestCase\):", line)
         if m:
@@ -207,6 +226,7 @@ def update_test_file(test_file, generated_code):
     # Reindent generated code with base indent = class_indent + 4 spaces.
     new_methods = reindent_generated_code(generated_code, base_indent=class_indent + "    ")
     print("🚀 Processed test methods to insert:\n", new_methods)
+    
     updated_lines = insert_tests_into_existing_class(lines, new_methods)
     with open(test_file, "w", encoding="utf-8") as f:
         f.writelines(updated_lines)
@@ -216,20 +236,28 @@ def generate_and_update_tests(coverage_report_file, test_folder):
     """
     Identifies files with low branch coverage, generates missing test methods,
     and inserts these methods into the first unittest.TestCase subclass in the appropriate test file.
+    The prompt includes the source file content, existing test file content, coverage,
+    missing statements, and missing branches information.
     """
     low_coverage_files = parse_coverage_report(coverage_report_file)
     if not low_coverage_files:
         print("✅ All files have 100% coverage! No additional tests needed.")
         return
     source_root = os.path.abspath("source_files")
-    for file_name, missing_branches, coverage in low_coverage_files:
-        print(f"📌 Low coverage detected in {file_name} ({coverage}%) with {missing_branches} missing branch(es)")
+    for file_name, missing_statements, missing_branches, coverage in low_coverage_files:
+        print(f"📌 Low coverage detected in {file_name} ({coverage}%) - Missing statements: {missing_statements}, missing branches: {missing_branches}")
         abs_file = os.path.abspath(file_name)
         try:
             relative_path = os.path.relpath(abs_file, source_root)
         except Exception as e:
             print(f"⚠️ Could not compute relative path for {file_name}: {e}")
             relative_path = os.path.basename(file_name)
+        try:
+            with open(abs_file, "r", encoding="utf-8") as src:
+                source_content = src.read()
+        except Exception as e:
+            print(f"⚠️ Could not read source file {file_name}: {e}")
+            source_content = ""
         test_subfolder = os.path.join(test_folder, os.path.dirname(relative_path))
         if not os.path.exists(test_subfolder):
             os.makedirs(test_subfolder)
@@ -238,14 +266,37 @@ def generate_and_update_tests(coverage_report_file, test_folder):
         test_file = os.path.join(test_subfolder, test_file_name)
         if not os.path.exists(test_file):
             print(f"⚠️ No existing test file found: {test_file}")
-            # Optionally, create a new test file here.
+            continue
         else:
             print(f"🔍 Found existing test file: {test_file}")
+        try:
+            with open(test_file, "r", encoding="utf-8") as tf:
+                test_file_content = tf.read()
+        except Exception as e:
+            print(f"⚠️ Could not read test file {test_file}: {e}")
+            test_file_content = ""
+        print(missing_branches)
         prompt = (
-            f"Generate missing test cases for {file_name}. "
-            f"The coverage is {coverage}%. There are {missing_branches} missing branch(es). "
+            f"Generate missing test cases for the file {file_name}.\n"
+            f"Coverage is {coverage}%. Missing statements: {missing_statements}, missing branches: {missing_branches}.\n\n"
+            f"--- Source Code ---\n{source_content}\n\n"
+            f"--- Existing Test Cases ---\n{test_file_content}\n\n"
+            f"Ensure all conditional branches, including nested conditions and edge cases, are covered.Test cases should trigger different execution paths, including combinations of conditions where applicable."
+            f"Pay special attention to nested 'if' conditions and ensure all logical paths are exercised. "
+            f"For example, if an 'if' statement contains 'if A and B:', test cases must include:\n"
+            f" - A=True, B=True\n"
+            f" - A=True, B=False\n"
+            f" - A=False, B=True\n"
+            f" - A=False, B=False\n"
+             f"Similarly, if an 'if' statement contains 'if A or B:', include cases for:\n"
+            f" - A=True, B=True\n"
+            f" - A=True, B=False\n"
+            f" - A=False, B=True\n"
+            f" - A=False, B=False\n"
+            f"Test each if conditions for  both postive and negative values"
+            f"Each test method should be defined with a 'self' parameter (e.g. 'def test_example(self):'). "
             f"Provide only valid Python test functions (starting with 'def test_') without the class header. "
-            f"Do not include any markdown or instructional text."
+            f"Do not include any markdown formatting such as ``` or ```python or instructional text."
         )
         response = test_generation_agent.generate_oai_reply(
             messages=[{"role": "user", "content": prompt}]
@@ -256,7 +307,7 @@ def generate_and_update_tests(coverage_report_file, test_folder):
         update_test_file(test_file, cleaned_test_cases)
 
 if __name__ == "__main__":
-    test_folder = "./tests"
+    test_folder = "./tests" 
     coverage_report_path = "coverage_report.txt"
     measure_coverage(test_folder, coverage_report_path)
     generate_and_update_tests(coverage_report_path, test_folder)
