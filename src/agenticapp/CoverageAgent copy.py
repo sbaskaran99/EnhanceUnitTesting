@@ -127,13 +127,14 @@ import textwrap
 def reindent_generated_code(generated_code, base_indent="    "):
     """
     Reindents the generated code by:
-      - Dedenting the entire block (removing any common leading whitespace).
+      - Removing common leading whitespace (dedenting).
       - Ensuring function definitions have the correct indentation.
-      - Indenting function bodies one level deeper than the function definition.
+      - Indenting function bodies one level deeper.
+      - Handling nested structures (e.g., with, if, for) at deeper levels.
     
     Parameters:
       generated_code (str): The code block to reindent.
-      base_indent (str): The indent to prepend (e.g., class indent + 4 spaces).
+      base_indent (str): The indent to prepend (default: 4 spaces).
     
     Returns:
       str: The properly reindented code.
@@ -141,21 +142,29 @@ def reindent_generated_code(generated_code, base_indent="    "):
     dedented = textwrap.dedent(generated_code)
     lines = dedented.splitlines()
     formatted_lines = []
-    inside_function = False  # Tracks if we are inside a function block
+    inside_function = False  # Tracks if we are inside a function
+    inside_nested_block = False  # Tracks if we are inside a `with`, `if`, `for`, `while` block
 
     for line in lines:
         stripped = line.lstrip()
 
-        # If line starts with `def`, it's a function definition
-        if stripped.startswith("def "):
+        if stripped.startswith("def "):  # Function definition
             formatted_lines.append(base_indent + stripped)
-            inside_function = True  # Next lines should be further indented
-        elif inside_function and stripped:  # Indent function body lines
-            formatted_lines.append(base_indent * 2 + stripped)
+            inside_function = True  # Function body starts in the next lines
+            inside_nested_block = False  # Reset nested block status
+        elif inside_function and stripped:  # Function body (2nd level)
+            if stripped.startswith(("with ", "if ", "for ", "while ")):  # Nested structures (3rd level)
+                formatted_lines.append(base_indent * 2 + stripped)
+                inside_nested_block = True  # Next line should be at level 3
+            elif inside_nested_block:  # Inside `with`, `if`, etc. (3rd level)
+                formatted_lines.append(base_indent * 3 + stripped)
+                inside_nested_block = False  # Reset after handling one nested level
+            else:
+                formatted_lines.append(base_indent * 2 + stripped)  # Normal function body
         elif not stripped:  # Preserve blank lines
             formatted_lines.append("")
         else:
-            formatted_lines.append(base_indent + stripped)  # Regular line
+            formatted_lines.append(base_indent + stripped)  # Regular line outside function
 
     return "\n".join(formatted_lines) + "\n"
 
@@ -275,29 +284,49 @@ def generate_and_update_tests(coverage_report_file, test_folder):
         except Exception as e:
             print(f"⚠️ Could not read test file {test_file}: {e}")
             test_file_content = ""
-        print(missing_branches)
+        
         prompt = (
-            f"Generate missing test cases for the file {file_name}.\n"
-            f"Coverage is {coverage}%. Missing statements: {missing_statements}, missing branches: {missing_branches}.\n\n"
-            f"--- Source Code ---\n{source_content}\n\n"
-            f"--- Existing Test Cases ---\n{test_file_content}\n\n"
-            f"Ensure all conditional branches, including nested conditions and edge cases, are covered.Test cases should trigger different execution paths, including combinations of conditions where applicable."
-            f"Pay special attention to nested 'if' conditions and ensure all logical paths are exercised. "
-            f"For example, if an 'if' statement contains 'if A and B:', test cases must include:\n"
-            f" - A=True, B=True\n"
-            f" - A=True, B=False\n"
-            f" - A=False, B=True\n"
-            f" - A=False, B=False\n"
-             f"Similarly, if an 'if' statement contains 'if A or B:', include cases for:\n"
-            f" - A=True, B=True\n"
-            f" - A=True, B=False\n"
-            f" - A=False, B=True\n"
-            f" - A=False, B=False\n"
-            f"Test each if conditions for  both postive and negative values"
-            f"Each test method should be defined with a 'self' parameter (e.g. 'def test_example(self):'). "
-            f"Provide only valid Python test functions (starting with 'def test_') without the class header. "
-            f"Do not include any markdown formatting such as ``` or ```python or instructional text."
+        f"Generate missing test cases for the file {file_name}.\n"
+        f"Current test coverage is {coverage}%. The following branches are missing coverage:\n"
+        f"- Missing Statements: {missing_statements}\n"
+        f"- Missing Branches: {missing_branches}\n\n"
+    
+        f"--- Source Code ---\n{source_content}\n\n"
+        f"--- Existing Test Cases ---\n{test_file_content}\n\n"
+
+        f"### Objective: Maximize Branch Coverage\n"
+        f"- Identify **only uncovered execution paths** in all control structures (`if`, `elif`, `else`, `for`, `while`, `try-except`).\n"
+        f"- **Do NOT generate test cases that already exist in `test_file_content`.**\n"
+        f"- **Focus ONLY on the missing branches listed above.**\n"
+        f"- **Each test function must target a specific missing condition.**\n\n"
+
+        f"### Constraints:\n"
+        f"- **No Duplication:** Ensure new test cases do not repeat existing ones.\n"
+        f"- **Do NOT generate class headers (`class TestXYZ`) or import statements.**\n"
+        f"- **Do NOT include `if __name__ == \"__main__\": unittest.main()`**\n"
+        f"- **Valid Python Tests Only:**\n"
+        f"  - Each function must start with `def test_...`.\n"
+        f"  - Each function must include `self` as the first parameter.\n"
+        f"  - Each function must be properly formatted.\n"
+        f"- **Do NOT include any markdown formatting such as ``` or ```python **\n"
+        f"- **Each test function should have a descriptive name based on the missing branch.**\n"
+        f"- **Assume existing setup: Do not redefine class instances if already initialized in `test_file_content`.**\n\n"
+
+        f"### Test Coverage Strategy:\n"
+        f"For each missing branch, generate test cases that cover all logical scenarios:\n"
+        f"- If `if A and B:`, ensure tests for:\n"
+        f"  - (A=True, B=True), (A=True, B=False), (A=False, B=True), (A=False, B=False)\n"
+        f"- If `if A or B:`, ensure tests for:\n"
+        f"  - (A=True, B=True), (A=True, B=False), (A=False, B=True), (A=False, B=False)\n"
+        f"- Ensure **boundary cases**, **edge cases**, and **invalid inputs** are covered where relevant.\n"
+    
+        f"### Expected Output Format:\n"
+        f"- **Only the missing test functions** without any extra text, instructions, or explanations.\n"
+        f"- **Do not include any markdown formatting such as ``` or ```python**\n"
+        f" -**Each test must be a properly formatted Python function starting with `def test_...`\n "
+        f"- **Each test method should have a descriptive name and include the 'self' parameter. (e.g. 'def test_example(self):')**\n"
         )
+        
         response = test_generation_agent.generate_oai_reply(
             messages=[{"role": "user", "content": prompt}]
         )
@@ -309,8 +338,8 @@ def generate_and_update_tests(coverage_report_file, test_folder):
 if __name__ == "__main__":
     test_folder = "./tests" 
     coverage_report_path = "coverage_report.txt"
-    measure_coverage(test_folder, coverage_report_path)
-    generate_and_update_tests(coverage_report_path, test_folder)
+    #measure_coverage(test_folder, coverage_report_path)
+    #generate_and_update_tests(coverage_report_path, test_folder)
     print("\n🔄 Re-running tests after updating coverage...")
     measure_coverage(test_folder, coverage_report_path)
 

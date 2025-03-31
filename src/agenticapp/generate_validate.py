@@ -66,7 +66,7 @@ def main():
             process_source_files(SOURCE_FOLDER_PATH, TEST_FOLDER_PATH)
             # Run tests and generate initial coverage report.
             discover_and_run_tests(TEST_FOLDER_PATH, "results.json", RESULTS_FILE_PATH)
-            measure_coverage(TEST_FOLDER_PATH)
+            measure_coverage(TEST_FOLDER_PATH,COVERAGE_REPORT_PATH)
             st.session_state.test_generated = True
             st.rerun()
 
@@ -89,8 +89,7 @@ def main():
                 shutil.rmtree(CACHE_PATH, ignore_errors=True)
                 st.write(f"Deleted cache folder: {CACHE_PATH}")
             discover_and_run_tests("./tests", "fixed_testcaseresults.json", FIXED_TESTCASERESULTS_PATH)
-
-            measure_coverage(TEST_FOLDER_PATH)
+            measure_coverage(TEST_FOLDER_PATH,COVERAGE_REPORT_PATH)
             st.session_state.test_fixed = True
             st.rerun()
 
@@ -104,10 +103,10 @@ def main():
             if st.button("🚀 Improve Coverage"):
                 generate_and_update_tests(COVERAGE_REPORT_PATH, TEST_FOLDER_PATH)
                 discover_and_run_tests("./tests", "improved_testcaseresults.json", IMPROVED_TESTCASERESULTS_PATH)
-                measure_coverage(TEST_FOLDER_PATH, COVERAGE_REPORT_PATH)
-                st.session_state.coverage_improvement = True
+                measure_coverage(TEST_FOLDER_PATH, COVERAGE_REPORT_PATH,should_restart=True)
+                st.session_state.coverage_improvement = True# New state
                 st.rerun()
-
+    
     if st.session_state.coverage_improvement:
         with st.expander("🔧 Improved Test Cases"):
             st.subheader("📄 View Test Results")
@@ -115,7 +114,7 @@ def main():
             df = display_coverage_report(COVERAGE_REPORT_PATH)
             st.subheader("📊 Test Coverage Report")
             st.dataframe(df)
-            st.rerun()
+
             if st.button("🚀 Deploy Again"):
                 st.success("✅ Deployment initiated successfully!")
 
