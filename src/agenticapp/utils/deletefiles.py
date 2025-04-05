@@ -6,16 +6,20 @@ def delete_files_and_folders():
         "D:\\Sai\\EnhanceUnitTesting\\test_results.html",
         "D:\\Sai\\EnhanceUnitTesting\\test_results.json",
         "D:\\Sai\\EnhanceUnitTesting\\coverage_report.txt",
+        "D:\\Sai\\EnhanceUnitTesting\\coverage_report1.txt",
         "D:\\Sai\\EnhanceUnitTesting\\fixed_testcaseresults.html",
         "D:\\Sai\\EnhanceUnitTesting\\fixed_testcaseresults.json",
         "D:\\Sai\\EnhanceUnitTesting\\results.html",
-        "D:\\Sai\\EnhanceUnitTesting\\results.json"
+        "D:\\Sai\\EnhanceUnitTesting\\results.json",
+        "D:\\Sai\\EnhanceUnitTesting\\improved_testcaseresults.html",
+        "D:\\Sai\\EnhanceUnitTesting\\improved_testcaseresults.json",
     ]
     
     directories_to_clear = [
         "D:\\Sai\\EnhanceUnitTesting\\source_files",
         "D:\\Sai\\EnhanceUnitTesting\\tests",
         "D:\\Sai\\EnhanceUnitTesting\\coverage_html_report",
+        "D:\\Sai\\EnhanceUnitTesting\\coverage_html1_report",
         "D:\\Sai\\EnhanceUnitTesting\\.cache"
     ]
     

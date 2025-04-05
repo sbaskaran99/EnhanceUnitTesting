@@ -3,7 +3,6 @@ import os
 import re
 from autogen import AssistantAgent,config_list_from_json
 from template_prompts import build_fix_prompt
-from CoverageAgent import update_test_files
 from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
@@ -99,8 +98,24 @@ def extract_test_function(test_path, test_name):
 
 
 def fix_test_case(source_code,test_function_code, error_reason):
-    
-    messages=build_fix_prompt(source_code, test_function_code, error_reason)
+    prompt = f"""
+    The following test case is failing:
+
+    ```python
+    {test_function_code}
+    ```
+
+    Error:
+    ```
+    {error_reason}
+    ```
+
+    Please provide a corrected version of the test function.
+    """
+
+    messages = [{"role": "system", "content": "You are a helpful AI that fixes failing Python test cases."},
+                {"role": "user", "content": prompt}]
+    build_fix_prompt(source_code, test_function_code, error_reason)
     response = openai_agent.generate_oai_reply( messages)
     #response = openai_agent.generate_reply(messages)
     print("response is ",response)
@@ -134,76 +149,38 @@ def apply_regex_fix(test_name, test_function_code, error_reason):
         return test_function_code
 
     return None
-
-
-def locate_source_file(test_name, SOURCE_FOLDER_PATH):
-    """Locate the corresponding source file based on test name structure and class."""
-    test_parts = test_name.split(".")[:-1]  # Remove function name
-    test_class = test_parts[-1]  # e.g., TestPolicyService
-
-    # Convert CamelCase to snake_case
-    file_base_name = re.sub(r'(?<!^)(?=[A-Z])', '_', test_class).lower()
-    print("file base name:", file_base_name)
-
-    # Remove 'test_' prefix if present
-    if file_base_name.startswith("test_"):
-        file_base_name = file_base_name[5:]
-
-    source_file_name = f"{file_base_name}.py"
-    source_subfolder = os.path.join(*test_parts[0:-2])  # Adjusted here
-
-    print(f"[DEBUG] Searching for a source file matching: {source_file_name} in {SOURCE_FOLDER_PATH}/{source_subfolder}")
-
-    for root, _, files in os.walk(SOURCE_FOLDER_PATH):
-        for file in files:
-            full_path = os.path.join(root, file)
-            normalized_path = full_path.replace("\\", "/")
-            normalized_target = os.path.join(SOURCE_FOLDER_PATH, source_subfolder).replace("\\", "/")
-
-            if file == source_file_name and normalized_target in normalized_path:
-                print(f"[FOUND] Source file located: {full_path}")
-                return full_path
-
-    print(f"[ERROR] Source file for {test_name} not found.")
-    return None
 def update_test_file(test_path, test_name, error_reason):
-    # Extract function if it exists
     test_function_code, content = extract_test_function(test_path, test_name)
 
-    # Try regex fix
-    fixed_code = apply_regex_fix(test_name, test_function_code, error_reason) if test_function_code else None
+    if not test_function_code:
+        print(f"[ERROR] Could not extract function {test_name} from {test_path}")
+        return
 
-    # If regex fix fails, fall back to LLM
+    # First, try regex-based fix
+    fixed_code = apply_regex_fix(test_name, test_function_code, error_reason)
+
+    # If regex fix didn't work, use GPT-4
     if not fixed_code:
-        print(f"[INFO] Using OpenAI to fix or create {test_name}")
-        SOURCE_FOLDER_PATH = r"D:\Sai\EnhanceUnitTesting\source_files"
-        source_path = locate_source_file(test_name, SOURCE_FOLDER_PATH)
-
-        if not source_path:
-            print(f"[ERROR] Source file not found for {test_name}, skipping OpenAI fix.")
-            return
-
-        with open(source_path, "r", encoding="utf-8") as source_file:
-            source_code = source_file.read()
-
-        fixed_code = fix_test_case(source_code, test_function_code, error_reason)
+        print(f"[INFO] Using OpenAI to fix {test_name}")
+        fixed_code = fix_test_case(test_function_code, error_reason)
 
     if not fixed_code:
         print(f"[ERROR] Failed to generate a fix for {test_name}")
         return
 
-    if test_function_code:
-        # Remove the existing failing function
-        content = content.replace(test_function_code, "").strip()
+    # Ensure function is properly replaced
+    new_content = content.replace(test_function_code, fixed_code)
 
-        with open(test_path, "w", encoding="utf-8") as file:
-            file.write(content)
+    # Verify that changes were made
+    if new_content == content:
+        print(f"[ERROR] Replacement failed for {test_name}, possible regex issue.")
+        return
 
-        print(f"[INFO] Deleted failing function: {test_name} from {test_path}")
+    # Save the updated test file
+    with open(test_path, "w", encoding="utf-8") as file:
+        file.write(new_content)
 
-    # Append the fixed or new test function using update_test_files
-    update_test_files(test_path, fixed_code)
-    print(f"[SUCCESS] Appended modified test case: {test_name} into {test_path}")
+    print(f"[SUCCESS] Updated test case: {test_name} in {test_path}")
 
 # Main function
 def fix_failing_tests(TEST_RESULTS_FILE):
@@ -220,5 +197,4 @@ def fix_failing_tests(TEST_RESULTS_FILE):
             update_test_file(test_path, test["name"], test["reason"])
 
 if __name__ == "__main__":
-    IMPROVED_TEST_RESULTS_FILE = "improved_testcaseresults.json"
-    fix_failing_tests(IMPROVED_TEST_RESULTS_FILE)
+    fix_failing_tests()

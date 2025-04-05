@@ -166,3 +166,71 @@ def get_prompt(code_chunk, file_name, language="python", prompt_type="functional
     {examples}
     """
 
+def generate_branch_coverage_prompt(coverage, file_name, missing_statements, missing_branches,source_content, test_file_content):
+    prompt = (
+        f"Generate missing test cases for the file {file_name}.\n"
+        f"Current test coverage is {coverage}%. The following branches are missing coverage:\n"
+        f"- Missing Statements: {missing_statements}\n"
+        f"- Missing Branches: {missing_branches}\n\n"
+    
+        f"--- Source Code ---\n{source_content}\n\n"
+        f"--- Existing Test Cases ---\n{test_file_content}\n\n"
+
+        f"### Objective: Maximize Branch Coverage\n"
+        f"- Identify **only uncovered execution paths** in all control structures (`if`, `elif`, `else`, `for`, `while`, `try-except`).\n"
+        f"- **Do NOT generate test cases that already exist in `test_file_content`.**\n"
+        f"- **Focus ONLY on the missing branches listed above.**\n"
+        f"- **Each test function must target a specific missing condition.**\n\n"
+
+        f"### Constraints:\n"
+        f"- **No Duplication:** Ensure new test cases do not repeat existing ones.\n"
+        f"- **Do NOT generate class headers (`class TestXYZ`) or import statements.**\n"
+        f"- **Do NOT include `if __name__ == \"__main__\": unittest.main()`**\n"
+        f"- **Valid Python Tests Only:**\n"
+        f"  - Each function must start with `def test_...`.\n"
+        f"  - Each function must include `self` as the first parameter.\n"
+        f"  - Each function must be properly formatted.\n"
+        f"- **Do NOT include any markdown formatting such as ``` or ```python **\n"
+        f"- **Each test function should have a descriptive name based on the missing branch.**\n"
+        f"- **Assume existing setup: Do not redefine class instances if already initialized in `test_file_content`.**\n\n"
+
+        f"### Test Coverage Strategy:\n"
+        f"For each missing branch, generate test cases that cover all logical scenarios:\n"
+        f"- If `if A and B:`, ensure tests for:\n"
+        f"  - (A=True, B=True), (A=True, B=False), (A=False, B=True), (A=False, B=False)\n"
+        f"- If `if A or B:`, ensure tests for:\n"
+        f"  - (A=True, B=True), (A=True, B=False), (A=False, B=True), (A=False, B=False)\n"
+        f"- Ensure **boundary cases**, **edge cases**, and **invalid inputs** are covered where relevant.\n"
+    
+        f"### Expected Output Format:\n"
+        f"- **Only the missing test functions** without any extra text, instructions, or explanations.\n"
+        f"- Do not include any markdown formatting such as ``` or ```python \n"
+        f" -**Each test must be a properly formatted Python function starting with `def test_...`\n "
+        f"- **Each test method should have a descriptive name and include the 'self' parameter. (e.g. 'def test_example(self):')**\n"
+        )
+    return prompt
+
+def build_fix_prompt(source_code, test_function_code, error_reason):
+    prompt = [
+                 {
+                    "role": "system",
+                    "content": (
+                        "You are a Python expert. You are given a source file, a failing test function that tests it, "
+                        "and an error message. Fix the test function. Do not return explanations or formatting — just return the corrected test function code."
+                        )
+                },
+                {
+                    "role": "user",
+                    "content": f""" Source Code:{source_code}
+                                    Broken Test Function:{test_function_code}
+                                    Error Message:{error_reason}
+                                    ### Expected Output Format:
+                                     -Only the updated functions** without any extra text, instructions, or explanations.
+                                     -Do not include any markdown formatting such as ``` or ```python
+                                     -Do NOT generate class headers (`class TestXYZ`) or import statements.
+                                     -Each test must be a properly formatted Python function starting with `def test_...`
+                                     -Each test method should have a descriptive name and include the 'self' parameter. (e.g. 'def test_example(self):')
+                                """
+                 }
+             ]
+    return prompt

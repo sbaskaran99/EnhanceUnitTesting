@@ -1,13 +1,10 @@
-import subprocess
 import logging
 import os
 import streamlit as st
-import zipfile
-import tempfile
 import shutil
 from TestGenerationAgent import process_file  # Process each source file for test generation
 from TestExecutionAgent import discover_and_run_tests
-from CoverageAgent import measure_coverage, display_coverage_report, generate_and_update_tests
+from CoverageAgent import measure_coverage, display_coverage_report, generate_and_update_tests,measure_coverage_with_cli
 from AutoFixingAgent import fix_failing_tests
 from utils.file_utils import create_output_folder, extract_zip_file, clear_directories
 
@@ -22,8 +19,11 @@ RESULTS_FILE_PATH = r"D:/Sai/EnhanceUnitTesting/results.html"
 FIXED_TESTCASERESULTS_PATH = r"D:/Sai/EnhanceUnitTesting/fixed_testcaseresults.html"
 IMPROVED_TESTCASERESULTS_PATH = r"D:/Sai/EnhanceUnitTesting/improved_testcaseresults.html"
 COVERAGE_REPORT_PATH = "coverage_report.txt"
+IMPROVED_COVERAGE_REPORT_PATH = "coverage_report1.txt"
+FIXED_COVERAGE_REPORT_PATH = "coverage_report2.txt"
 CACHE_PATH = r"D:\Sai\EnhanceUnitTesting\.cache"
-
+TEST_RESULTS_FILE = "results.json"
+IMPROVED_TEST_RESULTS_FILE = "improved_testcaseresults.json"
 def process_source_files(source_folder, test_folder):
     """Process each Python file in the source folder and its subfolders."""
     for root, _, files in os.walk(source_folder):
@@ -76,45 +76,33 @@ def main():
         df = display_coverage_report(COVERAGE_REPORT_PATH)
         st.subheader("📊 Test Coverage Report")
         st.dataframe(df)
-
-        if st.button("⏳ Fix Test case issues..."):
-            st.write("Fix Test Case button clicked!")  # Debugging output
-            # Clear session state and caches before fixing tests.
-            for key in list(st.session_state.keys()):
-                del st.session_state[key]
-            st.cache_data.clear()
-            st.cache_resource.clear()
-            fix_failing_tests()
-            if os.path.exists(CACHE_PATH):
-                shutil.rmtree(CACHE_PATH, ignore_errors=True)
-                st.write(f"Deleted cache folder: {CACHE_PATH}")
-            discover_and_run_tests("./tests", "fixed_testcaseresults.json", FIXED_TESTCASERESULTS_PATH)
-            measure_coverage(TEST_FOLDER_PATH,COVERAGE_REPORT_PATH)
-            st.session_state.test_fixed = True
+        if st.button("🚀 Improve Coverage"):
+            generate_and_update_tests(COVERAGE_REPORT_PATH, TEST_FOLDER_PATH)
+            discover_and_run_tests("./tests", IMPROVED_TEST_RESULTS_FILE, IMPROVED_TESTCASERESULTS_PATH)
+            measure_coverage_with_cli(TEST_FOLDER_PATH, IMPROVED_COVERAGE_REPORT_PATH)
+            st.session_state.coverage_improvement = True# New state
             st.rerun()
-
-    if st.session_state.test_fixed:
-        with st.expander("🔧 Fixed Test Cases"):
-            st.subheader("📄 View Fixed Test Results")
-            st.markdown(f"[Click here to open fixed test results](file:///{FIXED_TESTCASERESULTS_PATH})", unsafe_allow_html=True)
-            df = display_coverage_report(COVERAGE_REPORT_PATH)
-            st.subheader("📊 Test Coverage Report")
-            st.dataframe(df)
-            if st.button("🚀 Improve Coverage"):
-                generate_and_update_tests(COVERAGE_REPORT_PATH, TEST_FOLDER_PATH)
-                discover_and_run_tests("./tests", "improved_testcaseresults.json", IMPROVED_TESTCASERESULTS_PATH)
-                measure_coverage(TEST_FOLDER_PATH, COVERAGE_REPORT_PATH,should_restart=True)
-                st.session_state.coverage_improvement = True# New state
-                st.rerun()
     
     if st.session_state.coverage_improvement:
         with st.expander("🔧 Improved Test Cases"):
             st.subheader("📄 View Test Results")
             st.markdown(f"[Click here to open results](file:///{IMPROVED_TESTCASERESULTS_PATH})", unsafe_allow_html=True)
-            df = display_coverage_report(COVERAGE_REPORT_PATH)
+            df = display_coverage_report(IMPROVED_COVERAGE_REPORT_PATH)
             st.subheader("📊 Test Coverage Report")
             st.dataframe(df)
-
+            if st.button('🚀 Fix Unit TestCases'):
+                fix_failing_tests(IMPROVED_TEST_RESULTS_FILE)
+                discover_and_run_tests("./tests", "fixed_testcaseresults.json", FIXED_TESTCASERESULTS_PATH)
+                measure_coverage_with_cli(TEST_FOLDER_PATH, FIXED_COVERAGE_REPORT_PATH)
+                st.session_state.test_fixed = True
+                st.rerun()
+    if st.session_state.test_fixed:
+        with st.expander("🔧 Fixed Test Cases"):
+            st.subheader("📄 View Fixed Test Results")
+            st.markdown(f"[Click here to open fixed test results](file:///{FIXED_TESTCASERESULTS_PATH})", unsafe_allow_html=True)
+            df = display_coverage_report(FIXED_COVERAGE_REPORT_PATH)
+            st.subheader("📊 Test Coverage Report")
+            st.dataframe(df)        
             if st.button("🚀 Deploy Again"):
                 st.success("✅ Deployment initiated successfully!")
 

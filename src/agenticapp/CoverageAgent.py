@@ -4,9 +4,11 @@ import re
 import os
 import sys
 import unittest
+import subprocess
 from dotenv import load_dotenv
 from autogen import AssistantAgent, config_list_from_json
 from utils.file_utils import find_test_file
+from template_prompts import generate_branch_coverage_prompt
 from TestGenerationAgent import clean_generated_code  # External function to clean AI response
 # Import streamlit
 import streamlit as st
@@ -15,7 +17,7 @@ import streamlit as st
 # --------------------------
 load_dotenv()
 
-config_path = r"D:\Sai\EnhanceUnitTesting\src\agenticapp\COVERAGE_CONFIG_LIST.json"
+config_path = r"D:\Sai\EnhanceUnitTesting\src\agenticapp\OAI_CONFIG_LIST.json"
 config_list = config_list_from_json(config_path)
 
 for config in config_list:
@@ -69,6 +71,7 @@ def measure_coverage(test_folder, coverage_report_file="coverage_report.txt",sho
     """
     global cov
     if should_restart:
+       cov.stop()  # Ensure coverage is stopped before erasing
        cov.erase()
        cov.start()  # Start coverage *before* running tests
     
@@ -88,6 +91,31 @@ def measure_coverage(test_folder, coverage_report_file="coverage_report.txt",sho
     print(f"✅ Coverage report saved to {coverage_report_file}")
     print("📊 HTML report generated in 'coverage_html_report/'")
 
+def measure_coverage_with_cli(test_folder, coverage_report_file="coverage_report1.txt"):
+    omit_patterns = ["tests/*", "*/__init__.py"]
+
+    # Run unit tests with branch coverage
+    subprocess.run([
+        "coverage", "run", "--branch", "-m", "unittest", "discover", "-s", test_folder, "-p", "test_*.py"
+    ])
+
+    # Generate text coverage report
+    with open(coverage_report_file, "w") as f:
+        subprocess.run([
+            "coverage", "report",
+            f"--omit={','.join(omit_patterns)}",
+            
+        ], stdout=f)
+
+    # Generate HTML coverage report
+    subprocess.run([
+        "coverage", "html",
+        
+        f"--omit={','.join(omit_patterns)}",
+        "-d", "coverage_html1_report"
+    ])
+
+        
 def parse_coverage_report(file_path):
     """
     Reads the text coverage report and returns a list of tuples:
@@ -130,7 +158,7 @@ def display_coverage_report(COVERAGE_REPORT_PATH):
                     data.append(parts)
 
         if data:
-            #df = pd.DataFrame(data, columns=["File", "Statements", "Missed","Branch", "BrPart", "Coverage"])
+            
             df = pd.DataFrame(data, columns=["File", "Statements", "Missed","Branches", "BrMissed", "Coverage"])
             df["Coverage"] = df["Coverage"].str.replace("%", "").astype(float)  # Convert coverage to numeric
 
@@ -229,7 +257,7 @@ def insert_tests_into_existing_class(existing_lines, new_test_methods):
         new_test_methods += "\n"
     return existing_lines[:insert_index] + [new_test_methods] + existing_lines[insert_index:]
 
-def update_test_file(test_file, generated_code):
+def update_test_files(test_file, generated_code):
     """
     Updates an existing test file by inserting the generated test methods into the first unittest.TestCase subclass.
     Assumes that generated_code already contains valid test method definitions.
@@ -299,56 +327,15 @@ def generate_and_update_tests(coverage_report_file, test_folder):
         except Exception as e:
             print(f"⚠️ Could not read test file {test_file}: {e}")
             test_file_content = ""
-        
-        prompt = (
-        f"Generate missing test cases for the file {file_name}.\n"
-        f"Current test coverage is {coverage}%. The following branches are missing coverage:\n"
-        f"- Missing Statements: {missing_statements}\n"
-        f"- Missing Branches: {missing_branches}\n\n"
-    
-        f"--- Source Code ---\n{source_content}\n\n"
-        f"--- Existing Test Cases ---\n{test_file_content}\n\n"
-
-        f"### Objective: Maximize Branch Coverage\n"
-        f"- Identify **only uncovered execution paths** in all control structures (`if`, `elif`, `else`, `for`, `while`, `try-except`).\n"
-        f"- **Do NOT generate test cases that already exist in `test_file_content`.**\n"
-        f"- **Focus ONLY on the missing branches listed above.**\n"
-        f"- **Each test function must target a specific missing condition.**\n\n"
-
-        f"### Constraints:\n"
-        f"- **No Duplication:** Ensure new test cases do not repeat existing ones.\n"
-        f"- **Do NOT generate class headers (`class TestXYZ`) or import statements.**\n"
-        f"- **Do NOT include `if __name__ == \"__main__\": unittest.main()`**\n"
-        f"- **Valid Python Tests Only:**\n"
-        f"  - Each function must start with `def test_...`.\n"
-        f"  - Each function must include `self` as the first parameter.\n"
-        f"  - Each function must be properly formatted.\n"
-        f"- **Do NOT include any markdown formatting such as ``` or ```python **\n"
-        f"- **Each test function should have a descriptive name based on the missing branch.**\n"
-        f"- **Assume existing setup: Do not redefine class instances if already initialized in `test_file_content`.**\n\n"
-
-        f"### Test Coverage Strategy:\n"
-        f"For each missing branch, generate test cases that cover all logical scenarios:\n"
-        f"- If `if A and B:`, ensure tests for:\n"
-        f"  - (A=True, B=True), (A=True, B=False), (A=False, B=True), (A=False, B=False)\n"
-        f"- If `if A or B:`, ensure tests for:\n"
-        f"  - (A=True, B=True), (A=True, B=False), (A=False, B=True), (A=False, B=False)\n"
-        f"- Ensure **boundary cases**, **edge cases**, and **invalid inputs** are covered where relevant.\n"
-    
-        f"### Expected Output Format:\n"
-        f"- **Only the missing test functions** without any extra text, instructions, or explanations.\n"
-        f"- Do not include any markdown formatting such as ``` or ```python \n"
-        f" -**Each test must be a properly formatted Python function starting with `def test_...`\n "
-        f"- **Each test method should have a descriptive name and include the 'self' parameter. (e.g. 'def test_example(self):')**\n"
-        )
-        
+        prompt=generate_branch_coverage_prompt(coverage, file_name, missing_statements, missing_branches,source_content, test_file_content)
         response = test_generation_agent.generate_oai_reply(
             messages=[{"role": "user", "content": prompt}]
         )
         raw_test_cases = response[1].strip() if isinstance(response, tuple) else response.strip()
         cleaned_test_cases = clean_generated_code(raw_test_cases).strip()
         print("🚀 Cleaned Test Cases:\n", cleaned_test_cases)
-        update_test_file(test_file, cleaned_test_cases)
+        update_test_files(test_file, cleaned_test_cases)
+
 
 if __name__ == "__main__":
     test_folder = "./tests" 

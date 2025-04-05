@@ -1,0 +1,46 @@
+import re
+import os
+
+def locate_source_file(test_name, SOURCE_FOLDER_PATH):
+    """Locate the corresponding source file based on test name structure and class."""
+    test_parts = test_name.split(".")[:-1]  # Remove function name
+    test_class = test_parts[-1]  # e.g., TestPolicyService
+
+    # Convert CamelCase to snake_case
+    file_base_name = re.sub(r'(?<!^)(?=[A-Z])', '_', test_class).lower()
+    print("file base name:", file_base_name)
+
+    # Remove 'test_' prefix if present
+    if file_base_name.startswith("test_"):
+        file_base_name = file_base_name[5:]
+
+    source_file_name = f"{file_base_name}.py"
+    source_subfolder = os.path.join(*test_parts[0:-2])  # Adjusted here
+
+    print(f"[DEBUG] Searching for a source file matching: {source_file_name} in {SOURCE_FOLDER_PATH}/{source_subfolder}")
+
+    for root, _, files in os.walk(SOURCE_FOLDER_PATH):
+        for file in files:
+            full_path = os.path.join(root, file)
+            normalized_path = full_path.replace("\\", "/")
+            normalized_target = os.path.join(SOURCE_FOLDER_PATH, source_subfolder).replace("\\", "/")
+
+            if file == source_file_name and normalized_target in normalized_path:
+                print(f"[FOUND] Source file located: {full_path}")
+                return full_path
+
+    print(f"[ERROR] Source file for {test_name} not found.")
+    return None
+
+
+if __name__ == "__main__":
+    SOURCE_FOLDER_PATH = r"D:\Sai\EnhanceUnitTesting\source_files"
+    test_name = "InsuranceApp_Modified.app.services.test_policy_service_0.TestPolicyService.test_create_policy_high_coverage_special_conditions_policy_id_below_500"
+    
+    source_path = locate_source_file(test_name, SOURCE_FOLDER_PATH)
+    if not source_path:
+        print(f"[ERROR] Source file not found for {test_name}")
+    else:
+        with open(source_path, "r", encoding="utf-8") as f:
+            source_code = f.read()
+        print(source_code)
