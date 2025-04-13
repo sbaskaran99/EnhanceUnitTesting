@@ -234,3 +234,86 @@ def build_fix_prompt(source_code, test_function_code, error_reason):
                  }
              ]
     return prompt
+
+
+def generate_mutation_prompt1(source_code: str, original_test_code: str, mutation_diff: str) -> str:
+    """
+    Generates a prompt for the LLM to create test cases that catch the given mutation.
+    """
+
+    prompt = [
+        {
+            "role": "system",
+            "content": (
+                "You are a Python testing expert using the `unittest` framework. Your job is to improve the test code "
+                "so it catches a mutation in the source code. A mutation is a small change (diff) in the logic. "
+                "Your test code should fail if the mutation is present. "
+                "Fix the test function. Do not return explanations or formatting — just return the corrected test function code."
+            )
+        },
+        {
+            "role": "user",
+            "content": (
+                f"Source Code:\n{source_code}\n\n"
+                f"Test Code:\n{original_test_code}\n\n"
+                f"Mutation Diff:\n{mutation_diff}\n\n"
+                "### Expected Output Format:\n"
+                "- Only the updated functions, without any extra text, instructions, or explanations.\n"
+                "- Do not include any markdown formatting such as ``` or ```python.\n"
+                "- Do NOT generate class headers (e.g., `class TestXYZ`) or import statements.\n"
+                "- Each test must be a properly formatted Python function starting with `def test_...`\n"
+                "- Each test method should have a descriptive name and include the 'self' parameter. (e.g., `def test_example(self):`)\n"
+            )
+        }
+    ]
+
+    return prompt
+def generate_mutation_prompt(source_code: str, original_test_code: str, mutation_diff: str) -> str:
+    """
+    Generates a prompt for the LLM to create test cases that catch the given mutation.
+    
+    Args:
+        source_code (str): The original source code
+        original_test_code (str): The existing test code
+        mutation_diff (str): The mutation changes made
+        strategy (str): The mutation strategy being applied (arithmetic, comparison, logical, boundary)
+    """
+    strategy = 'comparison'
+    # Strategy-specific guidance
+    strategy_guidance = {
+        'arithmetic': "Test arithmetic operations (+,-,*,/) and edge cases (0, negative numbers)",
+        'comparison': "Test comparison operators (==,!=,<,>,<=,>=) and boundary conditions",
+        'logical': "Test logical operations (and,or,not) with boolean combinations",
+        'boundary': "Test boundary values and off-by-one scenarios"
+    }
+
+
+    prompt = [
+        {
+            "role": "system",
+            "content": (
+                "You are a Python testing expert using the `unittest` framework. Your job is to improve the test code "
+                "so it catches a mutation in the source code. A mutation is a small change (diff) in the logic. "
+                f"Currently focusing on {strategy} mutations: {strategy_guidance.get(strategy, '')}. "
+                "Your test code should fail if the mutation is present. "
+                "Fix the test function. Do not return explanations or formatting — just return the corrected test function code."
+            )
+        },
+        {
+            "role": "user",
+            "content": (
+                f"Source Code:\n{source_code}\n\n"
+                f"Test Code:\n{original_test_code}\n\n"
+                f"Mutation Diff:\n{mutation_diff}\n\n"
+                "### Expected Output Format:\n"
+                "- Only the updated functions, without any extra text, instructions, or explanations.\n"
+                "- Do not include any markdown formatting such as ``` or ```python.\n"
+                "- Do NOT generate class headers (e.g., `class TestXYZ`) or import statements.\n"
+                "- Each test must be a properly formatted Python function starting with `def test_...`\n"
+                "- Each test method should have a descriptive name and include the 'self' parameter. (e.g., `def test_example(self):`)\n"
+                f"- Focus on {strategy} mutations and their edge cases.\n"
+            )
+        }
+    ]
+
+    return prompt

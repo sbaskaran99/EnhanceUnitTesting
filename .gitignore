@@ -5,6 +5,7 @@ __pycache__/
 *.log
 tests/
 source_files/
+mutation_coverage/
 .coverage
 coverage_report.html
 coverage_report.txt
@@ -20,6 +21,7 @@ improved_testcaseresults.html
 improved_testcaseresults.json
 fixed_testcaseresults.html
 fixed_testcaseresults.json
+mutation_report_before.yaml
 .dot
 .png
 .cache
