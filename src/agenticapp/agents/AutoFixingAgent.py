@@ -3,7 +3,7 @@ import os
 import re
 from autogen import AssistantAgent,config_list_from_json
 from template_prompts import build_fix_prompt
-from CoverageAgent import update_test_files
+from agenticapp.agents.CoverageAgent import update_test_files
 from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()

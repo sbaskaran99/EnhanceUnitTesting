@@ -7,9 +7,9 @@ import unittest
 import subprocess
 from dotenv import load_dotenv
 from autogen import AssistantAgent, config_list_from_json
-from utils.file_utils import find_test_file
-from template_prompts import generate_branch_coverage_prompt
-from TestGenerationAgent import clean_generated_code  # External function to clean AI response
+from agenticapp.utils.file_utils import find_test_file
+from agenticapp.template_prompts import generate_branch_coverage_prompt
+from agenticapp.agents.TestGenerationAgent import clean_generated_code  # External function to clean AI response
 # Import streamlit
 import streamlit as st
 # --------------------------

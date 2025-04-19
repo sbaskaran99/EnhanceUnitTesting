@@ -5,9 +5,9 @@ import subprocess
 from autogen import AssistantAgent
 from autogen.oai.openai_utils import config_list_from_json
 from dotenv import load_dotenv
-from template_prompts import generate_mutation_prompt
-from utils.mutationutils import apply_mutation
-from CoverageAgent import update_test_files
+from agenticapp.template_prompts import generate_mutation_prompt
+from agenticapp.utils.mutationutils import apply_mutation
+from agenticapp.agents.CoverageAgent import update_test_files
 import sys
 import traceback
 # Load environment variables
@@ -92,7 +92,8 @@ def get_mutation_coverage(project_root, target_module, test_module, stage_name='
     # Generate unique report name
     report_name = f'mutation_report_{stage_name}.yaml' if stage_name else 'mutation_report.yaml'
     report_path = os.path.join(project_root, report_name)
-
+    # Generate HTML report directory with stage name
+    html_report_dir = f"mutation_coverage_{stage_name}" if stage_name else "mutation_coverage"
     try:
         cmd = [
             sys.executable,  # This gets the current Python interpreter path,
@@ -100,13 +101,15 @@ def get_mutation_coverage(project_root, target_module, test_module, stage_name='
             '--target', target_module,
             '--unit-test', test_module,
             '--report', report_path,
-            '--report-html', "mutation_coverage"
+            '--report-html', html_report_dir
         ]
         
         # Ensure report directory exists
         report_dir = os.path.dirname(report_path)
-        if not os.path.exists(report_dir):
-            os.makedirs(report_dir)
+        html_report_path = os.path.join(project_root, html_report_dir)
+        for dir_path in [report_dir, html_report_path]:
+            if not os.path.exists(dir_path):
+                os.makedirs(dir_path)
         
         # Run mutation test
         result = subprocess.run(
@@ -209,13 +212,13 @@ if __name__ == "__main__":
     print(f"\n📂 Selected App: {APP_NAME}")
     
     # Before mutation tests
-    print("📈 Measuring mutation coverage BEFORE mutation tests...")
-    coverage_before, stats_before = get_mutation_coverage(
-        PROJECT_ROOT, target_module, test_module, 'before'
-    )
+    #print("📈 Measuring mutation coverage BEFORE mutation tests...")
+    #coverage_before, stats_before = get_mutation_coverage(
+        #PROJECT_ROOT, target_module, test_module, 'before'
+    #)
 
     # Generate mutation tests
-    run_mutation_tests(TEST_FOLDER_PATH, SOURCE_FOLDER_PATH)
+    #run_mutation_tests(TEST_FOLDER_PATH, SOURCE_FOLDER_PATH)
 
     # After mutation tests
     print("\n📈 Measuring mutation coverage AFTER mutation tests...")
@@ -227,11 +230,11 @@ if __name__ == "__main__":
     print("\n📊 Mutation Coverage Report")
     print(f"| Metric            | Before  | After   | Change  |")
     print(f"|-------------------|---------|---------|---------|")
-    print(f"| Killed Mutants    | {stats_before['killed']:7} | {stats_after['killed']:7} | {stats_after['killed'] - stats_before['killed']:7} |")
-    print(f"| Survived Mutants  | {stats_before['survived']:7} | {stats_after['survived']:7} | {stats_after['survived'] - stats_before['survived']:7} |")
-    print(f"| Total Mutants     | {stats_before['total']:7} | {stats_after['total']:7} | {stats_after['total'] - stats_before['total']:7} |")
-    print(f"| Mutation Score    | {stats_before['mutation_score']:7.1f}% | {stats_after['mutation_score']:7.1f}% | {stats_after['mutation_score'] - stats_before['mutation_score']:7.1f}% |")
+    #print(f"| Killed Mutants    | {stats_before['killed']:7} | {stats_after['killed']:7} | {stats_after['killed'] - stats_before['killed']:7} |")
+    #print(f"| Survived Mutants  | {stats_before['survived']:7} | {stats_after['survived']:7} | {stats_after['survived'] - stats_before['survived']:7} |")
+    #print(f"| Total Mutants     | {stats_before['total']:7} | {stats_after['total']:7} | {stats_after['total'] - stats_before['total']:7} |")
+    #print(f"| Mutation Score    | {stats_before['mutation_score']:7.1f}% | {stats_after['mutation_score']:7.1f}% | {stats_after['mutation_score'] - stats_before['mutation_score']:7.1f}% |")
     
     print("\n🔍 YAML reports available at:") 
-    print(f"- Before: {os.path.join(PROJECT_ROOT, 'mutation_report_before.yaml')}")
+    #print(f"- Before: {os.path.join(PROJECT_ROOT, 'mutation_report_before.yaml')}")
     print(f"- After:  {os.path.join(PROJECT_ROOT, 'mutation_report_after.yaml')}")

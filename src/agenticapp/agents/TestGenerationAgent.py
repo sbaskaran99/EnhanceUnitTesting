@@ -4,7 +4,7 @@ import logging
 import re
 from dotenv import load_dotenv
 from utils.chunking_utils import chunk_code
-from utils.file_utils import list_files, read_file, write_file, create_init_files
+from agenticapp.utils.file_utils import list_files, read_file, write_file, create_init_files
 from template_prompts import get_prompt
 
 # Load environment variables

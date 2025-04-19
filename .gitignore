@@ -6,6 +6,8 @@ __pycache__/
 tests/
 source_files/
 mutation_coverage/
+mutation_coverage_before/
+mutation_coverage_after/
 .coverage
 coverage_report.html
 coverage_report.txt
