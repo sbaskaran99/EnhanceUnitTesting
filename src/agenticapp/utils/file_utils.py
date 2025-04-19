@@ -2,6 +2,9 @@ import os
 import tempfile
 import zipfile
 import shutil
+import logging
+
+logger = logging.getLogger(__name__)
 def list_files(directory, extensions=None):
     if extensions is None:
         extensions = [".py"]
@@ -75,3 +78,62 @@ def find_test_file(source_file, test_dir):
             return test_file_path
     print(f"No test file found for {source_file}.")
     return None 
+def backup_modified_files(source_dir, test_dir, backup_dir):
+    """
+    Backup modified source and test files while skipping cache directories.
+    
+    Args:
+        source_dir (str): Path to source files directory
+        test_dir (str): Path to test files directory
+        backup_dir (str): Path where backup should be stored
+    
+    Returns:
+        bool: True if backup successful, False otherwise
+    """
+    try:
+        logger.info("Starting backup of modified files")
+        
+        # Create fresh backup directory
+        if os.path.exists(backup_dir):
+            shutil.rmtree(backup_dir)
+        os.makedirs(backup_dir)
+        
+        def copy_python_files(src_dir, dst_dir, dir_type):
+            """Copy Python files while preserving structure and metadata"""
+            if not os.path.exists(src_dir):
+                raise FileNotFoundError(f"{dir_type} directory not found: {src_dir}")
+                
+            # Create destination directory
+            os.makedirs(dst_dir, exist_ok=True)
+            
+            for root, dirs, files in os.walk(src_dir):
+                # Skip __pycache__ directories
+                dirs[:] = [d for d in dirs if d != '__pycache__']
+                
+                for file in files:
+                    if file.endswith('.py'):
+                        src_file = os.path.join(root, file)
+                        # Create relative path to maintain structure
+                        rel_path = os.path.relpath(root, src_dir)
+                        dst_path = os.path.join(dst_dir, rel_path)
+                        os.makedirs(dst_path, exist_ok=True)
+                        
+                        # Copy with metadata preserved
+                        dst_file = os.path.join(dst_path, file)
+                        shutil.copy2(src_file, dst_file)
+                        logger.info(f"Backed up {dir_type} file: {dst_file}")
+        
+        # Backup source files
+        source_backup_dir = os.path.join(backup_dir, "source_backup")
+        copy_python_files(source_dir, source_backup_dir, "source")
+        
+        # Backup test files
+        test_backup_dir = os.path.join(backup_dir, "test_backup")
+        copy_python_files(test_dir, test_backup_dir, "test")
+        
+        logger.info("File backup completed successfully")
+        return True
+        
+    except Exception as e:
+        logger.error(f"Error backing up files: {str(e)}")
+        return False

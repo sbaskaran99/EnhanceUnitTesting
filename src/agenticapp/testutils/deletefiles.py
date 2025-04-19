@@ -17,7 +17,7 @@ def delete_files_and_folders():
     directories_to_clear = [
         "source_files", "tests", 
         "coverage_html_report", "coverage_html1_report",
-        "mutation_coverage", "mutation_coverage_before", "mutation_coverage_after",
+        "mutation_coverage", "mutation_coverage_before", "mutation_coverage_after","backup_files"
         ".cache", "__pycache__"  # Add Python cache directories
     ]
     

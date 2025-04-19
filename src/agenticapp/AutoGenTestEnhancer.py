@@ -20,12 +20,13 @@ from agenticapp.agents import (
     AutoFixingAgent,
     MutationTestAgent
 )
+
 from agenticapp.utils import file_utils, mutationutils
 from agenticapp.agents.TestGenerationAgent import process_file
 from agenticapp.agents.TestExecutionAgent import discover_and_run_tests
 from agenticapp.agents.CoverageAgent import measure_coverage, display_coverage_report, generate_and_update_tests, measure_coverage_with_cli
 from agenticapp.agents.AutoFixingAgent import fix_failing_tests
-from agenticapp.utils.file_utils import create_output_folder, extract_zip_file, clear_directories
+from agenticapp.utils.file_utils import create_output_folder, extract_zip_file, clear_directories,backup_modified_files
 from agenticapp.agents.MutationTestAgent import get_mutation_coverage, run_mutation_tests
 from agenticapp.utils.mutationutils import display_mutation_results
 
@@ -129,17 +130,26 @@ def process_source_files(source_folder, test_folder):
         logger.error(f"Error processing source files: {str(e)}")
         st.error(f"❌ Error processing source files: {str(e)}")
 
-def copy_source_files(source_folder):
-    """Copy the source files to the SOURCE_FOLDER_PATH."""
+def copy_source_files(source_folder, force=False):
+    """Copy source files only if necessary"""
     try:
-        if os.path.exists(SOURCE_FOLDER_PATH):
-            shutil.rmtree(SOURCE_FOLDER_PATH)
-        shutil.copytree(source_folder, SOURCE_FOLDER_PATH)
-        st.success(f"✅ Source files copied to: `{SOURCE_FOLDER_PATH}`")
-        logger.info(f"Source files copied to: {SOURCE_FOLDER_PATH}")
+        # Only copy if directory doesn't exist or force is True
+        if not os.path.exists(SOURCE_FOLDER_PATH) or force:
+            if os.path.exists(SOURCE_FOLDER_PATH):
+                logger.info("Removing existing source files directory")
+                shutil.rmtree(SOURCE_FOLDER_PATH)
+            
+            logger.info(f"Copying source files from {source_folder}")
+            shutil.copytree(source_folder, SOURCE_FOLDER_PATH)
+            logger.info(f"Source files copied to: {SOURCE_FOLDER_PATH}")
+            return True
+        else:
+            logger.info(f"Using existing files in: {SOURCE_FOLDER_PATH}")
+            return True
     except Exception as e:
         logger.error(f"Error copying source files: {str(e)}")
         st.error(f"❌ Error copying source files: {str(e)}")
+        return False
 
 def handle_test_generation(test_directory):
     """Handle the test generation process"""
@@ -177,9 +187,8 @@ def handle_test_fixing():
     except Exception as e:
         logger.error(f"Error fixing tests: {str(e)}")
         st.error(f"❌ Error fixing tests: {str(e)}")
-
 def handle_mutation_testing(stage='before'):
-    """Handle mutation testing process with proper file state management"""
+    """Handle mutation testing process"""
     try:
         report_dir = os.path.join(PROJECT_ROOT, f"mutation_coverage_{stage}")
         os.makedirs(report_dir, exist_ok=True)
@@ -192,56 +201,20 @@ def handle_mutation_testing(stage='before'):
                 st.session_state.mutation_stats = stats.copy()
                 st.session_state.mutation_test = True
                 logger.info("Initial mutation testing completed successfully")
-                return coverage, stats
-            
+                
         elif stage == 'after':
             logger.info("Starting final mutation testing with modified files")
-            # Verify directories exist
-            if not os.path.exists(MUTATION_SOURCE_FOLDER_PATH):
-                raise FileNotFoundError(f"Source directory not found: {MUTATION_SOURCE_FOLDER_PATH}")
-            if not os.path.exists(MUTATION_TEST_FOLDER_PATH):
-                raise FileNotFoundError(f"Test directory not found: {MUTATION_TEST_FOLDER_PATH}")
-
-            # Clear Python module cache
-            import sys
-            modules_to_reload = [
-                m for m in sys.modules 
-                if m.startswith(('source_files', 'tests'))
-            ]
-            for module in modules_to_reload:
-                del sys.modules[module]
+            logger.info("Using existing modified files for testing")
             
-            # Run mutation testing on current files
-            logger.info("Running mutation testing on modified files")
             coverage, stats = get_mutation_coverage(PROJECT_ROOT, target_module, test_module, stage)
-            
             if stats:
                 st.session_state.final_stats = stats.copy()
                 st.session_state.mutation_stats = stats.copy()
                 st.session_state.final_mutation_measured = True
                 logger.info("Final mutation testing completed successfully")
                 
-                # Log improvement metrics
-                initial_score = st.session_state.initial_stats['mutation_score']
-                final_score = stats['mutation_score']
-                improvement = final_score - initial_score
-                logger.info(f"Mutation score improved by {improvement:.1f}% "
-                          f"(from {initial_score:.1f}% to {final_score:.1f}%)")
-                
-                return coverage, stats
-            else:
-                raise ValueError("No mutation statistics generated")
+        return coverage, stats
         
-        return None, None
-        
-    except FileNotFoundError as e:
-        logger.error(f"Directory error in mutation testing: {str(e)}")
-        st.error(f"❌ {str(e)}")
-        return None, None
-    except ValueError as e:
-        logger.error(f"Value error in mutation testing: {str(e)}")
-        st.error(f"❌ {str(e)}")
-        return None, None
     except Exception as e:
         logger.error(f"Error in mutation testing ({stage}): {str(e)}")
         st.error(f"❌ Error in mutation testing: {str(e)}")
@@ -265,15 +238,20 @@ def main():
     uploaded_zip = st.file_uploader("Choose a zip file containing the source folder", type=["zip"])
     if uploaded_zip:
         source_folder = extract_zip_file(uploaded_zip)
-        copy_source_files(source_folder)
-
+        if copy_source_files(source_folder, force=True):
+            st.success("✅ Source files uploaded successfully")
+        else:
+            st.error("❌ Failed to copy source files")
+            return
+    
         test_directory = os.path.join(TEST_FOLDER_PATH, APP_NAME)
         os.makedirs(test_directory, exist_ok=True)
 
         if st.button('🚀 Generate Unit TestCases'):
             handle_test_generation(test_directory)
             st.rerun()
-
+    # Ensure directories exist without copying
+    ensure_directories()
     # Display test results
     if st.session_state.test_generated:
         st.subheader("📄 Initial Test Results")
@@ -344,23 +322,15 @@ def main():
                 if st.button('🚀 Measure Final Mutation Coverage'):
                     # First backup the current modified files
                     backup_dir = os.path.join(PROJECT_ROOT, "backup_files")
-                    if os.path.exists(backup_dir):
-                        shutil.rmtree(backup_dir)
-                    os.makedirs(backup_dir)
-                    
-                    shutil.copytree(MUTATION_SOURCE_FOLDER_PATH, 
-                                os.path.join(backup_dir, "source_backup"),
-                                dirs_exist_ok=True)
-                    shutil.copytree(MUTATION_TEST_FOLDER_PATH,
-                                os.path.join(backup_dir, "test_backup"),
-                                dirs_exist_ok=True)
-                    st.session_state.files_backed_up = True
-                    
-                    coverage, stats = handle_mutation_testing('after')
-                    if stats:
-                        st.session_state.final_mutation_measured = True
-                        st.rerun()
-            
+                    if backup_modified_files(MUTATION_SOURCE_FOLDER_PATH, MUTATION_TEST_FOLDER_PATH, backup_dir):
+                        st.session_state.files_backed_up = True
+                        coverage, stats = handle_mutation_testing('after')
+                        if stats:
+                            st.session_state.final_mutation_measured = True
+                            st.rerun()
+                    else:
+                        st.error("❌ Failed to backup modified files")        
+                 
             # Show final results after measurement
             if st.session_state.final_mutation_measured:
                 st.markdown("---")  # Add separator
