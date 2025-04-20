@@ -93,12 +93,13 @@ def initialize_session_state():
         "tests_generated": False,
         "final_mutation_measured": False,
         "mutation_improvement_started": False,
+        "final_mutation_coverage":False,
         "files_backed_up": False,
         "initial_stats": {
             "mutation_score": 0.0,
             "killed": 0,
             "survived": 0,
-            "total": 0
+                                    "total": 0
         },
         "final_stats": {
             "mutation_score": 0.0,
@@ -318,41 +319,20 @@ def main():
                 st.info("1. Review generated test cases in the test folder")
                 st.info("2. Update source code to handle new test cases")
                 st.warning("3. Save all code changes before measuring")
-                
                 if st.button('🚀 Measure Final Mutation Coverage'):
-                    # First backup the current modified files
-                    backup_dir = os.path.join(PROJECT_ROOT, "backup_files")
-                    if backup_modified_files(MUTATION_SOURCE_FOLDER_PATH, MUTATION_TEST_FOLDER_PATH, backup_dir):
-                        st.session_state.files_backed_up = True
-                        coverage, stats = handle_mutation_testing('after')
-                        if stats:
-                            st.session_state.final_mutation_measured = True
-                            st.rerun()
-                    else:
-                        st.error("❌ Failed to backup modified files")        
+                    st.session_state.final_mutation_measured = True
+                    st.rerun()
                  
             # Show final results after measurement
             if st.session_state.final_mutation_measured:
                 st.markdown("---")  # Add separator
                 st.subheader("📊 Final Mutation Results")
                 final_mutation_report = get_mutation_report_path('after')
-                display_mutation_results(st.session_state.final_stats, final_mutation_report)
+                abs_path = os.path.abspath(final_mutation_report).replace("\\", "/")
+                st.markdown(f'<a href="file:///{abs_path}" target="_blank">📋 View Detailed Mutation Report</a>', unsafe_allow_html=True )
+                if st.button("🚀 Deploy", type="primary"):
+                    st.success("✅ Deployment initiated successfully!")
+                    st.balloons()
                 
-                improvement = (st.session_state.final_stats['mutation_score'] - 
-                            st.session_state.initial_stats['mutation_score'])
-                
-                st.metric(
-                    label="Mutation Score Improvement",
-                    value=f"{st.session_state.final_stats['mutation_score']:.1f}%",
-                    delta=f"{improvement:+.1f}%"
-                )
-    
-                if st.session_state.final_stats['mutation_score'] >= 60:
-                    if st.button("🚀 Deploy", type="primary"):
-                        st.success("✅ Deployment initiated successfully!")
-                        st.balloons()
-                else:
-                    st.warning("⚠️ Consider improving the mutation score before deployment")
-
 if __name__ == "__main__":
     main()

@@ -25,6 +25,7 @@ improved_testcaseresults.json
 fixed_testcaseresults.html
 fixed_testcaseresults.json
 mutation_report_before.yaml
+mutation_report_after.yaml
 .dot
 .png
 .cache
