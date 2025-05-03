@@ -226,10 +226,10 @@ def display_results_link(file_path, title):
     st.markdown(f'<a href="file:///{abs_path}" target="_blank">{title}</a>', unsafe_allow_html=True)
 
 def main():
-    #st.title('🧪 Enhance Unit Testing Using LLMs')
+    #st.title('🧪  Enhance Unit Testing Using LLMs')
     st.markdown("""
         <h1 style='text-align: center; white-space: nowrap;'>
-            🧪 Enhance Unit Testing Using LLMs
+            🧪 Agentic UnitTest Enhancement<br> Framework(AUTEF)
         </h1>
     """, unsafe_allow_html=True)
     initialize_session_state()
