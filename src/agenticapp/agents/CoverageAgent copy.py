@@ -244,8 +244,6 @@ def insert_tests_into_existing_class(existing_lines, new_test_methods):
 
     for idx in range(insert_index, len(existing_lines)):
         line = existing_lines[idx]
-        if line.strip() == "":
-            continue
         if line.lstrip().startswith("if __name__ =="):
             insert_index = idx
             break
