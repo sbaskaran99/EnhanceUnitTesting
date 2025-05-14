@@ -4,7 +4,7 @@ __pycache__/
 *.pyc
 *.log
 tests/
-source_files/
+#source_files/
 mutation_coverage/
 mutation_coverage_before/
 mutation_coverage_after/
